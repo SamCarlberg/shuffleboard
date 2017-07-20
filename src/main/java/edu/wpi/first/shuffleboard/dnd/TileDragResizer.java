@@ -7,6 +7,8 @@ import edu.wpi.first.shuffleboard.widget.TileSize;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import javafx.geometry.HPos;
+import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
@@ -37,6 +39,7 @@ public final class TileDragResizer {
   private boolean didDragInit;
   private boolean dragging;
   private ResizeLocation resizeLocation = ResizeLocation.NONE;
+  private TileSize startSize;
 
   private enum ResizeLocation {
     NONE(Cursor.DEFAULT, false, false),
@@ -102,7 +105,11 @@ public final class TileDragResizer {
       return;
     }
     dragging = false;
+    final boolean moveLeft = resizeLocation.name().contains("WEST");
+    final boolean moveUp = resizeLocation.name().contains("NORTH");
     tile.setCursor(Cursor.DEFAULT);
+    GridPane.setValignment(tile, VPos.TOP);
+    GridPane.setHalignment(tile, HPos.LEFT);
     resizeLocation = ResizeLocation.NONE;
 
     // round size to nearest tile size
@@ -117,7 +124,14 @@ public final class TileDragResizer {
 
     tile.setMinWidth(tilePane.tileSizeToWidth(boundedWidth));
     tile.setMinHeight(tilePane.tileSizeToHeight(boundedHeight));
-    tile.setSize(new TileSize(boundedWidth, boundedHeight));
+    TileSize newSize = new TileSize(boundedWidth, boundedHeight);
+    tile.setSize(newSize);
+    if (moveLeft) {
+      GridPane.setColumnIndex(tile, GridPane.getColumnIndex(tile) + startSize.getWidth() - newSize.getWidth());
+    }
+    if (moveUp) {
+      GridPane.setRowIndex(tile, GridPane.getRowIndex(tile) + startSize.getHeight() - newSize.getHeight());
+    }
     GridPane.setColumnSpan(tile, boundedWidth);
     GridPane.setRowSpan(tile, boundedHeight);
   }
@@ -188,8 +202,30 @@ public final class TileDragResizer {
     final double mouseX = event.getX();
     final double mouseY = event.getY();
 
-    final double newWidth = tile.getMinWidth() + (mouseX - lastX);
-    final double newHeight = tile.getMinHeight() + (mouseY - lastY);
+    final double widthChange;
+    final double heightChange;
+
+    if (resizeLocation.name().contains("WEST")) {
+      widthChange = lastX - mouseX;
+    } else {
+      widthChange = mouseX - lastX;
+    }
+
+    if (resizeLocation.name().contains("NORTH")) {
+      heightChange = lastY - mouseY;
+    } else {
+      heightChange = mouseY - lastY;
+    }
+
+    final double newWidth = tile.getMinWidth() + widthChange;
+    final double newHeight = tile.getMinHeight() + heightChange;
+
+    if (resizeLocation.name().contains("NORTH")) {
+      GridPane.setValignment(tile, VPos.BOTTOM);
+    }
+    if (resizeLocation.name().contains("WEST")) {
+      GridPane.setHalignment(tile, HPos.RIGHT);
+    }
 
     if (resizeLocation.isHorizontal && newWidth >= tilePane.getTileSize()) {
       tile.setMinWidth(newWidth);
@@ -217,6 +253,7 @@ public final class TileDragResizer {
     if (!didDragInit) {
       tile.setMinHeight(tile.getHeight());
       tile.setMinWidth(tile.getWidth());
+      startSize = tile.getSize();
       didDragInit = true;
     }
 
