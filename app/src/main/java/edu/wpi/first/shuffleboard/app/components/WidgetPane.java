@@ -192,8 +192,13 @@ public class WidgetPane extends TilePane implements ComponentContainer {
    */
   private void resizeTiles() {
     tiles.forEach(tile -> {
-      tile.setMaxWidth(tileSizeToWidth(tile.getSize().getWidth()));
-      tile.setMaxHeight(tileSizeToHeight(tile.getSize().getHeight()));
+      double newWidth = tileSizeToWidth(tile.getSize().getWidth());
+      double newHeight = tileSizeToHeight(tile.getSize().getHeight());
+      tile.setMaxWidth(newWidth);
+      tile.setPrefWidth(newWidth);
+      tile.setMaxHeight(newHeight);
+      tile.setPrefHeight(newHeight);
+      tile.setSize(round(newWidth, newHeight));
     });
   }
 
