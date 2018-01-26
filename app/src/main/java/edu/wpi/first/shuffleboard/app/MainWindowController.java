@@ -402,7 +402,8 @@ public class MainWindowController {
     try {
       Writer writer = Files.newWriter(selected, Charset.forName("UTF-8"));
 
-      DashboardData dashboardData = new DashboardData(centerSplitPane.getDividerPositions()[0], dashboard);
+      DashboardData dashboardData = new DashboardData(
+          centerSplitPane.getDividerPositions()[0], dashboard, dashboard.getSelectionModel().getSelectedIndex());
       JsonBuilder.forSaveFile().toJson(dashboardData, writer);
       writer.flush();
     } catch (Exception e) {
@@ -461,6 +462,10 @@ public class MainWindowController {
       setDashboard(dashboardData.getTabPane());
       Platform.runLater(() -> {
         centerSplitPane.setDividerPositions(dashboardData.getDividerPosition());
+        int index = dashboardData.getSelectedTabIndex();
+        if (index >= 0 && index < dashboardData.getTabPane().getTabs().size() - 1) { // -1 to avoid the adder tab
+          dashboard.getSelectionModel().select(index);
+        }
       });
     } catch (Exception e) {
       log.log(Level.WARNING, "Couldn't load", e);
