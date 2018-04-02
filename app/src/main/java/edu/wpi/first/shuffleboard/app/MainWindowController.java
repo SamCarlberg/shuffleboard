@@ -496,6 +496,9 @@ public class MainWindowController {
     if (dashboardData == null) {
       throw new IOException("Save file could not be read: " + saveFile);
     }
+    if (dashboardData.getTabPane().getTabs().size() <= 1) { // Compare to 1 for the adder tab
+      throw new IOException("No tabs in the save file " + saveFile);
+    }
     setDashboard(dashboardData.getTabPane());
     Platform.runLater(() -> {
       centerSplitPane.setDividerPositions(dashboardData.getDividerPosition());
