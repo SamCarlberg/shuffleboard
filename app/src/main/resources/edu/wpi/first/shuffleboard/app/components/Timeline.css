@@ -1,0 +1,130 @@
+.timeline {
+    -swatch-importance-lowest: darkslategray;
+    -swatch-importance-low: darkgray;
+    -swatch-importance-normal: gray;
+    -swatch-importance-high: darkorange;
+    -swatch-importance-highest: orange;
+}
+
+.timeline .track {
+    -fx-background-color: linear-gradient(to bottom, #e3e3e3, lightgray);
+    -fx-border-color: lightgray;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Progress Handles                                                            *
+ *                                                                             *
+ ******************************************************************************/
+.timeline:focused .progress-handle {
+    /*-fx-effect: dropshadow(gaussian, derive(-fx-accent, -66%), 3, 0.2, 0, 0);*/
+}
+
+.timeline .progress-handle {
+    -fx-stroke: null;
+    -fx-fill: -fx-accent;
+    -fx-cursor: hand;
+}
+
+.timeline .progress-handle:pressed {
+    -fx-cursor: move;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Marker Handles                                                              *
+ *                                                                             *
+ ******************************************************************************/
+.timeline .marker-handle {
+    -fx-fill: darkgray;
+    -fx-stroke: null;
+    -fx-cursor: hand;
+}
+
+.timeline .marker-handle:current,
+.timeline .marker-handle:current:importance-lowest,
+.timeline .marker-handle:current:importance-low,
+.timeline .marker-handle:current:importance-normal,
+.timeline .marker-handle:current:importance-high,
+.timeline .marker-handle:current:importance-highest {
+    -fx-fill: -fx-accent;
+}
+
+.timeline .marker-handle:importance-lowest {
+    -fx-fill: -swatch-importance-lowest !important;
+}
+
+.timeline .marker-handle:importance-low {
+    -fx-fill: -swatch-importance-low !important;
+}
+
+.timeline .marker-handle:importance-normal {
+    -fx-fill: -swatch-importance-normal !important;
+}
+
+.timeline .marker-handle:importance-high {
+    -fx-fill: -swatch-importance-high !important;
+}
+
+.timeline .marker-handle:importance-highest {
+    -fx-fill: -swatch-importance-highest !important;
+}
+
+.timeline .detail-label {
+    -fx-background-color: -swatch-importance-normal;
+    -fx-text-fill: #3e3e3e;
+    -fx-label-padding: 1 2 1 2;
+    -fx-background-radius: 2;
+    -fx-border-color: darkgray;
+    -fx-border-width: 0;
+    -fx-background-insets: -1;
+}
+
+.timeline .detail-label:importance-lowest {
+    -fx-background-color: -swatch-importance-lowest;
+}
+
+.timeline .detail-label:importance-low {
+    -fx-background-color: -swatch-importance-low;
+}
+
+.timeline .detail-label:importance-normal {
+    -fx-background-color: -swatch-importance-normal;
+    -fx-text-fill: #3e3e3e;
+}
+
+.timeline .detail-label:importance-high {
+    -fx-background-color: -swatch-importance-high;
+    -fx-text-fill: #3e3e3e;
+}
+
+.timeline .detail-label:importance-highest {
+    -fx-background-color: -swatch-importance-highest;
+    -fx-text-fill: #3e3e3e;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Control Buttons                                                             *
+ *                                                                             *
+ ******************************************************************************/
+.timeline .controls > .glyph-button {
+    -fx-text-fill: darkgray !important;
+    -fx-fill: -fx-text-fill !important;
+    -fx-cursor: hand;
+}
+
+.timeline .controls > .glyph-button:hover {
+    -fx-text-fill: derive(darkgray, -15%) !important;
+}
+
+.timeline .controls > .glyph-button:selected,
+.timeline .controls > .glyph-button:pressed {
+    -fx-text-fill: darkslategray !important;
+}
+
+.timeline .controls > .glyph-button:selected:hover,
+.timeline .controls > .glyph-button:selected:pressed {
+    -fx-text-fill: derive(darkslategray, -15%) !important;
+}
+

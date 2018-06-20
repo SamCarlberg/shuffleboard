@@ -17,6 +17,9 @@ repositories {
     maven {
         setUrl("https://dl.bintray.com/samcarlberg/maven-artifacts/")
     }
+    maven {
+        setUrl("https://dl.bintray.com/jerady/maven/")
+    }
 }
 
 dependencies {
@@ -29,6 +32,7 @@ dependencies {
     compile(group = "com.github.samcarlberg", name = "update-checker", version = "+")
     compile(group = "com.github.zafarkhaja", name = "java-semver", version = "0.9.0")
     compile(group = "org.apache.commons", name = "commons-csv", version = "1.5")
+    compile(group = "de.jensd", name = "fontawesomefx", version = "8.9")
     testCompile(project("test_plugins"))
 }
 

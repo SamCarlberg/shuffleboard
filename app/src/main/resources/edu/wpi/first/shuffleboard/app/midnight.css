@@ -402,3 +402,59 @@
     -fx-border-color: #171F2F;
 }
 
+/*******************************************************************************
+ *                                                                             *
+ * Timeline Controls                                                           *
+ *                                                                             *
+ ******************************************************************************/
+.timeline {
+    -swatch-importance-lowest: #333;
+    -swatch-importance-low: #555;
+    -swatch-importance-normal: #777;
+    -swatch-importance-high: #999;
+    -swatch-importance-highest: #BBB;
+}
+
+.timeline .track {
+    -fx-border-width: 0;
+}
+
+.timeline .progress-handle {
+    -fx-fill: #e3e3e3;
+}
+
+.timeline .detail-label {
+    -fx-text-fill: derive(-fx-text-base-color, -15%);
+}
+
+.timeline .marker-handle {
+    -fx-fill: #636363;
+}
+
+.timeline .marker-handle:current {
+    -fx-fill: #e3e3e3;
+    -fx-stroke: null;
+}
+
+.timeline .detail-label:importance-high,
+.timeline .detail-label:importance-highest {
+    -fx-text-fill: #3e3e3e;
+}
+
+.timeline .controls > .glyph-button {
+    -fx-text-fill: -swatch-light-gray !important;
+}
+
+.timeline .controls > .glyph-button:hover {
+    -fx-text-fill: derive(-swatch-light-gray, 15%) !important;
+}
+
+.timeline .controls > .glyph-button:selected,
+.timeline .controls > .glyph-button:pressed {
+    -fx-text-fill: derive(-swatch-light-gray, 33%) !important;
+}
+
+.timeline .controls > .glyph-button:selected:hover,
+.timeline .controls > .glyph-button:selected:pressed {
+    -fx-text-fill: derive(-swatch-light-gray, 25%) !important;
+}

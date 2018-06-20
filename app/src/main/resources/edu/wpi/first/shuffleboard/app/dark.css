@@ -348,3 +348,43 @@
 .settings-pane {
     -fx-border-color: -swatch-dark-gray;
 }
+
+/*******************************************************************************
+ *                                                                             *
+ * Timeline Controls                                                           *
+ *                                                                             *
+ ******************************************************************************/
+.timeline .progress-handle {
+    -fx-fill: -swatch-100;
+}
+
+.timeline .detail-label {
+    -fx-text-fill: derive(-fx-text-base-color, -15%);
+}
+
+.timeline .marker-handle {
+    -fx-fill: #888;
+}
+
+.timeline .marker-handle:current {
+    -fx-fill: -swatch-100;
+    -fx-stroke: null;
+}
+
+.timeline .controls > .glyph-button {
+    -fx-text-fill: -swatch-light-gray !important;
+}
+
+.timeline .controls > .glyph-button:hover {
+    -fx-text-fill: derive(-swatch-light-gray, 15%) !important;
+}
+
+.timeline .controls > .glyph-button:selected,
+.timeline .controls > .glyph-button:pressed {
+    -fx-text-fill: derive(-swatch-light-gray, 33%) !important;
+}
+
+.timeline .controls > .glyph-button:selected:hover,
+.timeline .controls > .glyph-button:selected:pressed {
+    -fx-text-fill: derive(-swatch-light-gray, 25%) !important;
+}

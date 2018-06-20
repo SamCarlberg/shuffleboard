@@ -420,3 +420,42 @@
 .settings-pane .settings-categories .tree-cell > .tree-disclosure-node > .arrow {
     -fx-background-color: -fx-text-base-color;
 }
+
+/*******************************************************************************
+ *                                                                             *
+ * Timeline Controls                                                           *
+ *                                                                             *
+ ******************************************************************************/
+.timeline {
+}
+
+.timeline .track {
+    -fx-background-color: -swatch-light-gray;
+    -fx-border-color: -swatch-dark-gray;
+}
+
+.timeline .detail-label {
+    -fx-font-weight: normal;
+    -fx-font-family: "Roboto Light";
+    -fx-text-fill: #224;
+}
+
+.timeline .marker-handle {
+    -fx-fill: -swatch-dark-gray;
+}
+
+.timeline .marker-handle:current {
+    -fx-fill: blue;
+    -fx-stroke: -fx-fill;
+    -fx-stroke-width: 2;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * FontAwesome Glyphs                                                          *
+ *                                                                             *
+ ******************************************************************************/
+.glyph-icon {
+    -fx-font-family: FontAwesome !important;
+    -fx-fill: -fx-text-fill !important;
+}

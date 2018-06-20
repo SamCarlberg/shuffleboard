@@ -8,6 +8,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
+<?import edu.wpi.first.shuffleboard.app.components.Timeline?>
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="edu.wpi.first.shuffleboard.app.PlaybackController"
@@ -47,5 +48,6 @@
             <ToggleSwitch text="Loop" fx:id="loopingSwitch" alignment="CENTER" textAlignment="CENTER"/>
             <Label fx:id="progressLabel"/>
         </HBox>
+        <Timeline/>
     </HBox>
 </HBox>
