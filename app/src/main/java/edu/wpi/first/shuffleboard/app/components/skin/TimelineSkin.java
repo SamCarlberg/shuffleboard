@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -122,7 +123,14 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
         control.progressProperty().divide(timelineLength).multiply(track.widthProperty()));
 
     control.playingProperty().addListener((__, was, is) -> {
-      if (is) {
+      if (is && control.isAnimated()) {
+        startAnimation();
+      } else {
+        animation.stop();
+      }
+    });
+    control.animatedProperty().addListener((__, was, is) -> {
+      if (is && control.isPlaying()) {
         startAnimation();
       } else {
         animation.stop();
@@ -130,13 +138,13 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
     });
     control.loopPlaybackProperty().addListener((__, was, doLoop) -> {
       animation.setCycleCount(doLoop ? -1 : 1);
-      if (control.isPlaying()) {
+      if (control.isPlaying() && control.isAnimated()) {
         animation.stop();
         animation.playFrom(progressToTime(control.getProgress()));
       }
     });
 
-    if (control.isPlaying()) {
+    if (control.isPlaying() && control.isAnimated()) {
       startAnimation();
     }
     displayedMarker.addListener((__, old, marker) -> {
@@ -241,7 +249,9 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
       fadeTransition.setFromValue(1);
       fadeTransition.setOnFinished(__ -> {
         detail.setVisible(false);
-        markerMap.get(lastMarker).pseudoClassStateChanged(current, false);
+        if (lastMarker != null) {
+          markerMap.get(lastMarker).pseudoClassStateChanged(current, false);
+        }
         hidingDetailLabel = false;
       });
       fadeTransition.playFromStart();
@@ -301,6 +311,7 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
         new KeyFrame(Duration.ZERO, new KeyValue(control.progressProperty(), control.getStart())),
         new KeyFrame(control.getLength(), new KeyValue(control.progressProperty(), control.getEnd()))
     );
+    animation.setCycleCount(control.isLoopPlayback() ? Animation.INDEFINITE : 1);
     animation.setRate(control.getPlaybackSpeed());
     animation.playFrom(progressToTime(control.getProgress()));
   }
@@ -370,7 +381,6 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
   }
 
   private Path createProgressHandle() {
-    Timeline control = getSkinnable();
     Path handle = new Path(
         new MoveTo(-5, -7),
         new LineTo(5, -7),
@@ -382,7 +392,7 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
     handle.getStyleClass().add("progress-handle");
     EventHandler<MouseEvent> resumeOnDoubleClick = e -> {
       if (e.getClickCount() == 2) {
-        animation.playFrom(progressToTime(control.getProgress()));
+        getBehavior().togglePlayback();
       }
     };
     makeDraggable(handle);

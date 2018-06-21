@@ -27,10 +27,11 @@ public class TimelineTest extends Application {
     timeline.setDetailTimeout(Duration.seconds(5));
     timeline.setPlaybackSpeed(5);
     timeline.setPlaying(true);
+    timeline.setAnimated(true);
 
     StackPane root = new StackPane(timeline);
     root.getStylesheets().addAll(Themes.MIDNIGHT.getStyleSheets());
-    root.setPadding(new Insets(8));
+    root.setPadding(new Insets(32));
     stage.setScene(new Scene(root, 320, 64));
     stage.setMinHeight(64);
     stage.setMinWidth(128);

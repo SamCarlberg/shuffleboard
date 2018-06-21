@@ -36,6 +36,7 @@ public class Timeline extends Control {
   private final DoubleProperty playbackSpeed = new SimpleDoubleProperty(this, "playbackSpeed", 1);
   private final BooleanProperty playing = new SimpleBooleanProperty(this, "playing", false);
   private final BooleanProperty loopPlayback = new SimpleBooleanProperty(this, "loopPlayback", false);
+  private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", false);
 
   public Timeline() {
     this(0, 1, 0);
@@ -217,6 +218,18 @@ public class Timeline extends Control {
    */
   public void setLoopPlayback(boolean loopPlayback) {
     this.loopPlayback.set(loopPlayback);
+  }
+
+  public boolean isAnimated() {
+    return animated.get();
+  }
+
+  public BooleanProperty animatedProperty() {
+    return animated;
+  }
+
+  public void setAnimated(boolean animated) {
+    this.animated.set(animated);
   }
 
   /**

@@ -4,6 +4,7 @@
     -swatch-importance-normal: gray;
     -swatch-importance-high: darkorange;
     -swatch-importance-highest: orange;
+    -fx-padding: 4 3 16 3;
 }
 
 .timeline .track {
