@@ -2,6 +2,8 @@ package edu.wpi.first.shuffleboard.app.components.skin;
 
 import edu.wpi.first.shuffleboard.app.components.Timeline;
 
+// APIs that were hidden in Java 9 with no public replacements :(
+import com.sun.javafx.scene.control.skin.BehaviorSkinBase;
 import com.sun.javafx.util.Utils;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -16,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
@@ -28,12 +31,9 @@ import javafx.css.PseudoClass;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
-import javafx.scene.control.Skin;
 import javafx.scene.control.Tooltip;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -43,11 +43,10 @@ import javafx.scene.shape.ClosePath;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
-import javafx.util.Builder;
 import javafx.util.Duration;
 
 @SuppressWarnings("JavadocMethod")
-public final class TimelineSkin implements Skin<Timeline> {
+public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
 
   private final ListChangeListener<Timeline.Marker> markerListChangeListener;
 
@@ -87,6 +86,7 @@ public final class TimelineSkin implements Skin<Timeline> {
   private boolean hidingDetailLabel = false;
 
   public TimelineSkin(Timeline control) {
+    super(control, new TimelineBehavior(control));
     this.control = control;
     root = new VBox(2);
     track = new Pane();
@@ -210,23 +210,7 @@ public final class TimelineSkin implements Skin<Timeline> {
     foot.setLeft(time);
     foot.setRight(controls);
     root.getChildren().add(foot);
-    control.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
-      switch (e.getCode()) {
-        case SPACE:
-          control.setPlaying(!control.isPlaying());
-          break;
-        case KP_LEFT: // fallthrough
-        case LEFT:
-          moveToPreviousMarker();
-          break;
-        case KP_RIGHT: // fallthrough
-        case RIGHT:
-          moveToNextMarker();
-          break;
-        default:
-          break;
-      }
-    });
+    getChildren().add(root);
   }
 
   private static double computeDetailLabelPosition(double markerX, Number labelWidth, Number trackWidth) {
@@ -263,6 +247,9 @@ public final class TimelineSkin implements Skin<Timeline> {
     FontAwesomeIconView playPause = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
     FontAwesomeIconView next = new FontAwesomeIconView(FontAwesomeIcon.FORWARD);
     FontAwesomeIconView loop = new FontAwesomeIconView(FontAwesomeIcon.REPEAT);
+    Stream.of(prev, playPause, next, loop)
+        .map(v -> v.getStyleClass())
+        .forEach(c -> c.add("glyph-button"));
 
     Tooltip.install(prev, new Tooltip("Previous marker"));
     Tooltip ppt = new Tooltip();
@@ -272,9 +259,9 @@ public final class TimelineSkin implements Skin<Timeline> {
     Tooltip.install(next, new Tooltip("Next marker"));
     Tooltip.install(loop, new Tooltip("Repeat"));
 
-    prev.setOnMouseClicked(__ -> moveToPreviousMarker());
-    playPause.setOnMouseClicked(__ -> control.setPlaying(!control.isPlaying()));
-    next.setOnMouseClicked(__ -> moveToNextMarker());
+    prev.setOnMouseClicked(__ -> getBehavior().previousMarker());
+    playPause.setOnMouseClicked(__ -> getBehavior().togglePlayback());
+    next.setOnMouseClicked(__ -> getBehavior().nextMarker());
     loop.setOnMouseClicked(__ -> {
       boolean doLoop = !control.isLoopPlayback();
       control.setLoopPlayback(doLoop);
@@ -314,56 +301,6 @@ public final class TimelineSkin implements Skin<Timeline> {
     );
     animation.setRate(control.getPlaybackSpeed());
     animation.playFrom(progressToTime(control.getProgress()));
-  }
-
-  private void moveToPreviousMarker() {
-    Timeline.Marker closest = null;
-    for (Timeline.Marker marker : markerMap.keySet()) {
-      double diff = marker.getPosition() - control.getProgress();
-      if (diff >= 0) {
-        // Either the current control or one ahead of the current position; either way, it's not a marker we want
-        continue;
-      }
-      double lastDiff = closest == null ? 1 : closest.getPosition() - control.getProgress();
-      if (closest == null || diff > lastDiff) {
-        closest = marker;
-      }
-    }
-    if (closest != null) {
-      control.setPlaying(false);
-      setMarker(closest);
-    }
-  }
-
-  private void moveToNextMarker() {
-    Timeline.Marker closest = null;
-    for (Timeline.Marker marker : markerMap.keySet()) {
-      double diff = marker.getPosition() - control.getProgress();
-      if (diff <= 0) {
-        // Either the current control or one behind the current position; either way, it's not a marker we want
-        continue;
-      }
-      double lastDiff = closest == null ? -1 : closest.getPosition() - control.getProgress();
-      if (closest == null || diff < lastDiff) {
-        closest = marker;
-      }
-    }
-    if (closest != null) {
-      control.setPlaying(false);
-      setMarker(closest);
-    }
-  }
-
-  private void setMarker(Timeline.Marker marker) {
-    control.setProgress(marker.getPosition());
-    detail.setText(makeText(marker));
-    detail.setVisible(true);
-    detail.setOpacity(1);
-    if (lastMarker != null) {
-      markerMap.get(lastMarker).pseudoClassStateChanged(current, false);
-    }
-    lastMarker = marker;
-    markerMap.get(marker).pseudoClassStateChanged(current, true);
   }
 
   private String makeText(Timeline.Marker marker) {
@@ -470,16 +407,6 @@ public final class TimelineSkin implements Skin<Timeline> {
 
   private Duration progressToTime(double progress) {
     return control.getLength().multiply(progress / (control.getEnd() - control.getStart()));
-  }
-
-  @Override
-  public Timeline getSkinnable() {
-    return control;
-  }
-
-  @Override
-  public Node getNode() {
-    return root;
   }
 
   @Override
