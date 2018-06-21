@@ -56,9 +56,14 @@ public class TimelineBehavior extends BehaviorBase<Timeline> {
         break;
       default:
         super.callAction(name);
+        break;
     }
   }
 
+  /**
+   * Sets the control's progress to the closest marker prior to the current progress value. Does nothing if there is no
+   * such marker.
+   */
   public void previousMarker() {
     Timeline.Marker closest = closest(1, (a, b) -> a > b);
     if (closest != null) {
@@ -66,6 +71,10 @@ public class TimelineBehavior extends BehaviorBase<Timeline> {
     }
   }
 
+  /**
+   * Sets the control's progress to the closest marker after to the current progress value. Does nothing if there is no
+   * such marker.
+   */
   public void nextMarker() {
     Timeline.Marker closest = closest(-1, (a, b) -> a < b);
     if (closest != null) {
@@ -73,10 +82,15 @@ public class TimelineBehavior extends BehaviorBase<Timeline> {
     }
   }
 
-  private void moveToMarker(Timeline.Marker closest) {
+  /**
+   * Moves the timeline's progress to the given marker and stops its playback.
+   *
+   * @param marker the marker to move to
+   */
+  public void moveToMarker(Timeline.Marker marker) {
     Timeline control = getControl();
     control.setPlaying(false);
-    control.setProgress(closest.getPosition());
+    control.setProgress(marker.getPosition());
   }
 
   private Timeline.Marker closest(double defaultValue, BiFunction<Double, Double, Boolean> comparator) {
@@ -96,6 +110,9 @@ public class TimelineBehavior extends BehaviorBase<Timeline> {
     return closest;
   }
 
+  /**
+   * Sets the control's progress to the first marker on the timeline.
+   */
   public void firstMarker() {
     getControl().getMarkers()
         .stream()
@@ -103,6 +120,9 @@ public class TimelineBehavior extends BehaviorBase<Timeline> {
         .ifPresent(this::moveToMarker);
   }
 
+  /**
+   * Sets the control's progress to the last marker on the timeline.
+   */
   public void lastMarker() {
     getControl().getMarkers()
         .stream()
@@ -110,14 +130,26 @@ public class TimelineBehavior extends BehaviorBase<Timeline> {
         .ifPresent(this::moveToMarker);
   }
 
+  /**
+   * Toggles the control's {@link Timeline#playingProperty() playing property}.
+   */
   public void togglePlayback() {
     Timeline control = getControl();
     control.setPlaying(!getControl().isPlaying());
   }
 
+  /**
+   * Toggles the control's {@link Timeline#loopPlaybackProperty() loop playback property}.
+   */
   public void toggleLoop() {
     Timeline control = getControl();
-    control.setLoopPlayback(!control.isLoopPlayback());
+    boolean doLoop = !control.isLoopPlayback();
+    control.setLoopPlayback(doLoop);
+    if (doLoop && control.getProgress() == control.getEnd()) {
+      control.setPlaying(false);
+      control.setPlaying(true);
+      control.setProgress(control.getStart());
+    }
   }
 
 }

@@ -2,7 +2,6 @@ package edu.wpi.first.shuffleboard.app.components.skin;
 
 import edu.wpi.first.shuffleboard.app.components.Timeline;
 
-// APIs that were hidden in Java 9 with no public replacements :(
 import com.sun.javafx.scene.control.skin.BehaviorSkinBase;
 import com.sun.javafx.util.Utils;
 
@@ -16,7 +15,6 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -74,7 +72,7 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
   private final Map<Timeline.Marker, Node> markerMap = new HashMap<>();
   private final Map<Double, Timeline.Marker> markerPositions = new LinkedHashMap<>();
   private final Label detail = new Label();
-  private Timeline.Marker lastMarker = null;
+  private Timeline.Marker lastMarker = null; // NOPMD could be final - PMD doesn't understand lambdas
   private final ObjectProperty<Timeline.Marker> displayedMarker = new SimpleObjectProperty<>();
   private final MonadicBinding<Double> currentMarkerX = EasyBind.monadic(displayedMarker) // NOPMD could be local var
       .flatMap(m -> markerMap.get(m).layoutXProperty())
@@ -84,6 +82,7 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
   private final javafx.animation.Timeline animation = new javafx.animation.Timeline();
   private boolean tempView = false;
   private boolean hidingDetailLabel = false;
+  private final DoubleBinding timelineLength;
 
   public TimelineSkin(Timeline control) {
     super(control, new TimelineBehavior(control));
@@ -97,41 +96,45 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
     root.setMaxHeight(20);
     track.getStyleClass().add("track");
     root.getChildren().add(track);
-    DoubleBinding len = control.endProperty().subtract(control.startProperty());
+    timelineLength = control.endProperty().subtract(control.startProperty());
     markerListChangeListener = c -> {
       while (c.next()) {
         if (c.wasAdded()) {
           for (Timeline.Marker marker : c.getAddedSubList()) {
-            Node markerHandle = createMarkerHandle(marker);
-            markerHandle.layoutXProperty().bind(marker.positionProperty().divide(len).multiply(track.widthProperty()));
-            markerMap.put(marker, markerHandle);
-            track.getChildren().add(0, markerHandle);
+            addMarkerHandle(marker);
+            markerPositions.put(marker.getPosition(), marker);
           }
         } else if (c.wasRemoved()) {
           for (Timeline.Marker marker : c.getRemoved()) {
             Node removedMarkerHandle = markerMap.remove(marker);
             track.getChildren().remove(removedMarkerHandle);
+            markerPositions.remove(marker.getPosition());
           }
         }
       }
       c.getList().forEach(marker -> markerPositions.put(marker.getPosition(), marker));
     };
     for (Timeline.Marker marker : control.getMarkers()) {
-      Node markerHandle = createMarkerHandle(marker);
-      markerHandle.layoutXProperty().bind(marker.positionProperty().divide(len).multiply(track.widthProperty()));
-      markerMap.put(marker, markerHandle);
-      track.getChildren().add(0, markerHandle);
+      addMarkerHandle(marker);
+      markerPositions.put(marker.getPosition(), marker);
     }
-    control.getMarkers().forEach(marker -> markerPositions.put(marker.getPosition(), marker));
     control.getMarkers().addListener(markerListChangeListener);
     Path progressHandle = createProgressHandle();
-    progressHandle.layoutXProperty().bind(control.progressProperty().divide(len).multiply(track.widthProperty()));
+    progressHandle.layoutXProperty().bind(
+        control.progressProperty().divide(timelineLength).multiply(track.widthProperty()));
 
     control.playingProperty().addListener((__, was, is) -> {
       if (is) {
         startAnimation();
       } else {
         animation.stop();
+      }
+    });
+    control.loopPlaybackProperty().addListener((__, was, doLoop) -> {
+      animation.setCycleCount(doLoop ? -1 : 1);
+      if (control.isPlaying()) {
+        animation.stop();
+        animation.playFrom(progressToTime(control.getProgress()));
       }
     });
 
@@ -213,6 +216,14 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
     getChildren().add(root);
   }
 
+  public void addMarkerHandle(Timeline.Marker marker) {
+    Node markerHandle = createMarkerHandle(marker);
+    markerHandle.layoutXProperty().bind(
+        marker.positionProperty().divide(timelineLength).multiply(track.widthProperty()));
+    markerMap.put(marker, markerHandle);
+    track.getChildren().add(0, markerHandle);
+  }
+
   private static double computeDetailLabelPosition(double markerX, Number labelWidth, Number trackWidth) {
     return Utils.clamp(
         0,
@@ -241,8 +252,7 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
   }
 
   private HBox createControls() {
-    HBox controls = new HBox(4);
-    controls.getStyleClass().add("controls");
+    final Timeline control = getSkinnable();
     FontAwesomeIconView prev = new FontAwesomeIconView(FontAwesomeIcon.BACKWARD);
     FontAwesomeIconView playPause = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
     FontAwesomeIconView next = new FontAwesomeIconView(FontAwesomeIcon.FORWARD);
@@ -251,28 +261,22 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
         .map(v -> v.getStyleClass())
         .forEach(c -> c.add("glyph-button"));
 
+    Tooltip playPauseTooltip = new Tooltip();
+    playPauseTooltip.textProperty().bind(
+        EasyBind.monadic(control.playingProperty())
+            .map(playing -> playing ? "Pause" : "Play"));
+
     Tooltip.install(prev, new Tooltip("Previous marker"));
-    Tooltip ppt = new Tooltip();
-    ppt.textProperty().bind(EasyBind.monadic(playPause.glyphNameProperty())
-        .map(n -> n.toLowerCase(Locale.US)));
-    Tooltip.install(playPause, ppt);
+    Tooltip.install(playPause, playPauseTooltip);
     Tooltip.install(next, new Tooltip("Next marker"));
     Tooltip.install(loop, new Tooltip("Repeat"));
 
     prev.setOnMouseClicked(__ -> getBehavior().previousMarker());
     playPause.setOnMouseClicked(__ -> getBehavior().togglePlayback());
     next.setOnMouseClicked(__ -> getBehavior().nextMarker());
-    loop.setOnMouseClicked(__ -> {
-      boolean doLoop = !control.isLoopPlayback();
-      control.setLoopPlayback(doLoop);
-      if (doLoop && control.getProgress() == control.getEnd() && control.isPlaying()) {
-        control.setProgress(control.getStart());
-      }
-      animation.setCycleCount(doLoop ? -1 : 1);
-      if (control.isPlaying()) {
-        animation.stop();
-        animation.playFrom(progressToTime(control.getProgress()));
-      }
+    loop.setOnMouseClicked(__ -> getBehavior().toggleLoop());
+
+    control.loopPlaybackProperty().addListener((__, was, doLoop) -> {
       loop.pseudoClassStateChanged(PseudoClass.getPseudoClass("selected"), doLoop);
     });
 
@@ -285,12 +289,8 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
           }
         }));
 
-    controls.getChildren().addAll(
-        prev,
-        playPause,
-        next,
-        loop
-    );
+    HBox controls = new HBox(4, prev, playPause, next, loop);
+    controls.getStyleClass().add("controls");
     return controls;
   }
 
@@ -328,7 +328,6 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
   }
 
   private Node createMarkerHandle(Timeline.Marker marker) {
-    Timeline control = getSkinnable();
     // Diamond shape
     Path handle = new Path(
         new MoveTo(-4, 0),
@@ -340,8 +339,7 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
     handle.getStyleClass().add("marker-handle");
     handle.setOnMousePressed(__ -> {
       tempView = false;
-      control.setPlaying(false);
-      control.setProgress(marker.getPosition());
+      getBehavior().moveToMarker(marker);
       detail.setText(makeText(marker));
     });
     handle.setOnMouseEntered(__ -> {
@@ -350,9 +348,7 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
       detail.setText(makeText(marker));
       detail.setOpacity(1);
       detail.setVisible(true);
-      importanceClasses.forEach((p, c) -> {
-        detail.pseudoClassStateChanged(c, p == marker.getImportance());
-      });
+      updatePseudoClasses(marker, detail);
     });
     handle.setOnMouseExited(e -> {
       if (tempView && !detail.contains(detail.screenToLocal(e.getScreenX(), e.getScreenY()))) {
@@ -360,15 +356,15 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
         tempView = false;
       }
     });
-    marker.importanceProperty().addListener(__ -> {
-      importanceClasses.forEach((p, c) -> {
-        handle.pseudoClassStateChanged(c, p == marker.getImportance());
-      });
-    });
-    importanceClasses.forEach((p, c) -> {
-      handle.pseudoClassStateChanged(c, p == marker.getImportance());
-    });
+    marker.importanceProperty().addListener(__ -> updatePseudoClasses(marker, handle));
+    updatePseudoClasses(marker, handle);
     return handle;
+  }
+
+  private void updatePseudoClasses(Timeline.Marker marker, Node node) {
+    importanceClasses.forEach((p, c) -> {
+      node.pseudoClassStateChanged(c, p == marker.getImportance());
+    });
   }
 
   private Path createProgressHandle() {
