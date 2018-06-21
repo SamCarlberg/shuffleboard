@@ -44,7 +44,7 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.util.Duration;
 
-@SuppressWarnings("JavadocMethod")
+@SuppressWarnings({"JavadocMethod", "PMD.GodClass"})
 public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
 
   private final ListChangeListener<Timeline.Marker> markerListChangeListener;

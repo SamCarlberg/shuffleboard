@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import edu.wpi.first.shuffleboard.app.components.Scrubber?>
-<?import org.controlsfx.control.ToggleSwitch?>
+<?import edu.wpi.first.shuffleboard.app.components.Timeline?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.geometry.Insets?>
-<?import edu.wpi.first.shuffleboard.app.components.Timeline?>
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="edu.wpi.first.shuffleboard.app.PlaybackController"
@@ -17,18 +14,10 @@
       styleClass="playback-controls"
       spacing="8">
     <Button fx:id="recordButton" onAction="#toggleRecord"/>
-    <HBox fx:id="playbackControls" alignment="CENTER">
+    <HBox fx:id="playbackControls" alignment="CENTER" HBox.hgrow="ALWAYS">
         <padding>
             <Insets topRightBottomLeft="2"/>
         </padding>
-        <Button onAction="#previousFrame">
-            <graphic>
-                <ImageView>
-                    <Image url="/edu/wpi/first/shuffleboard/app/icons/icons8-Rewind-16.png"/>
-                </ImageView>
-            </graphic>
-        </Button>
-        <Button fx:id="playPauseButton" onAction="#togglePlayPause"/>
         <Button onAction="#stopPlayback">
             <graphic>
                 <ImageView>
@@ -36,18 +25,6 @@
                 </ImageView>
             </graphic>
         </Button>
-        <Button onAction="#nextFrame">
-            <graphic>
-                <ImageView>
-                    <Image url="/edu/wpi/first/shuffleboard/app/icons/icons8-Fast Forward-16.png"/>
-                </ImageView>
-            </graphic>
-        </Button>
-        <HBox alignment="CENTER" spacing="4">
-            <Scrubber fx:id="progressScrubber"/>
-            <ToggleSwitch text="Loop" fx:id="loopingSwitch" alignment="CENTER" textAlignment="CENTER"/>
-            <Label fx:id="progressLabel"/>
-        </HBox>
-        <Timeline/>
+        <Timeline fx:id="timeline" animated="false" loopPlayback="false" playing="false" playbackSpeed="1" prefWidth="-Infinity" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
     </HBox>
 </HBox>

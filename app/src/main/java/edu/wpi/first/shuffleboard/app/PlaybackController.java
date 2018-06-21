@@ -1,12 +1,11 @@
 package edu.wpi.first.shuffleboard.app;
 
-import edu.wpi.first.shuffleboard.app.components.Scrubber;
-import edu.wpi.first.shuffleboard.app.sources.recording.Playback;
 import edu.wpi.first.shuffleboard.api.sources.recording.Recorder;
-import edu.wpi.first.shuffleboard.api.sources.recording.TimestampedData;
+import edu.wpi.first.shuffleboard.api.sources.recording.Recording;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
+import edu.wpi.first.shuffleboard.app.components.Timeline;
+import edu.wpi.first.shuffleboard.app.sources.recording.Playback;
 
-import org.controlsfx.control.ToggleSwitch;
 import org.fxmisc.easybind.EasyBind;
 
 import java.util.Objects;
@@ -14,10 +13,10 @@ import java.util.Objects;
 import javafx.beans.property.Property;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.util.Duration;
 
 public class PlaybackController {
 
@@ -30,24 +29,14 @@ public class PlaybackController {
   @FXML
   private Button playPauseButton;
   @FXML
-  private Scrubber progressScrubber;
-  @FXML
-  private ToggleSwitch loopingSwitch;
-  @FXML
-  private Label progressLabel;
+  private Timeline timeline;
 
   private final ImageView recordIcon = new ImageView("/edu/wpi/first/shuffleboard/app/icons/icons8-Record-16.png");
   private final ImageView stopIcon = new ImageView("/edu/wpi/first/shuffleboard/app/icons/icons8-Stop-16.png");
-  private final ImageView playIcon = new ImageView("/edu/wpi/first/shuffleboard/app/icons/icons8-Play-16.png");
-  private final ImageView pauseIcon = new ImageView("/edu/wpi/first/shuffleboard/app/icons/icons8-Pause-16.png");
 
   private final Property<Number> frameProperty =
       EasyBind.monadic(Playback.currentPlaybackProperty())
           .selectProperty(Playback::frameProperty);
-
-  private final Property<Boolean> pausedProperty =
-      EasyBind.monadic(Playback.currentPlaybackProperty())
-          .selectProperty(Playback::pausedProperty);
 
   private final Property<Boolean> loopingProperty =
       EasyBind.monadic(Playback.currentPlaybackProperty())
@@ -59,46 +48,49 @@ public class PlaybackController {
         EasyBind.map(Playback.currentPlaybackProperty(), Objects::isNull));
     recordButton.graphicProperty().bind(
         EasyBind.map(Recorder.getInstance().runningProperty(), running -> running ? stopIcon : recordIcon));
-    frameProperty.addListener(__ -> {
-      progressScrubber.setProgressProperty(frameProperty);
-      progressScrubber.setMax(Playback.getCurrentPlayback().map(Playback::getMaxFrameNum).orElse(0));
+
+    timeline.endProperty().bind(EasyBind.monadic(Playback.currentPlaybackProperty()).map(Playback::getMaxFrameNum));
+    timeline.lengthProperty().bind(
+        EasyBind.monadic(Playback.currentPlaybackProperty())
+            .map(Playback::getRecording)
+            .map(Recording::getLength)
+            .map(Duration::millis)
+            .orElse(Duration.UNKNOWN));
+
+    Playback.currentPlaybackProperty().addListener((__, old, playback) -> {
+      timeline.getMarkers().clear();
+      timeline.getMarkers().addAll(
+          new Timeline.Marker("Start of recording", "", 0, Timeline.Importance.HIGHEST),
+          new Timeline.Marker("End of recording", "", playback.getMaxFrameNum(), Timeline.Importance.HIGHEST)
+      );
     });
-    progressScrubber.viewModeProperty().addListener((__, wasViewMode, isViewMode) -> {
-      if (isViewMode) {
-        Playback.getCurrentPlayback().ifPresent(Playback::pause);
+
+    timeline.progressProperty().addListener((__, old, progress) -> {
+      if (!timeline.isPlaying()) {
+        Playback.getCurrentPlayback().ifPresent(playback -> playback.setFrame(progress.intValue()));
       }
     });
 
-    progressScrubber.setBlockIncrement(1);
-
-    playPauseButton.graphicProperty().bind(
-        EasyBind.map(pausedProperty, paused -> paused == null || paused ? playIcon : pauseIcon));
+    timeline.playingProperty().addListener((__, was, is) -> {
+      if (is) {
+        Playback.getCurrentPlayback().ifPresent(Playback::unpause);
+      } else {
+        Playback.getCurrentPlayback().ifPresent(Playback::pause);
+      }
+    });
 
     frameProperty.addListener((__, prev, frame) -> {
       FxUtils.runOnFxThread(() -> {
         Playback playback = Playback.getCurrentPlayback().orElse(null);
         if (frame == null || playback == null) {
-          progressLabel.setText("");
+          timeline.setProgress(0);
         } else {
-          TimestampedData first = playback.getRecording().getFirst();
-          TimestampedData current = playback.getCurrentFrame();
-          if (first == null || current == null) {
-            progressLabel.setText("");
-          } else {
-            String time = msToMinSec(current.getTimestamp() - first.getTimestamp());
-            String length = msToMinSec(playback.getRecording().getLength());
-            progressLabel.setText(time + " / " + length);
-          }
+          timeline.setProgress(playback.getFrame());
         }
       });
     });
 
-    loopingSwitch.selectedProperty().bindBidirectional(loopingProperty);
-  }
-
-  private static String msToMinSec(long ms) {
-    long seconds = ms / 1000L;
-    return String.format("%d:%02d", seconds / 60, seconds % 60);
+    timeline.loopPlaybackProperty().bindBidirectional(loopingProperty);
   }
 
   @FXML
