@@ -66,7 +66,6 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
     importanceClasses.put(Timeline.Importance.HIGHEST, importanceHighest);
   }
 
-  private Timeline control;
   private Pane root;
   private final Pane track;
   private final Map<Timeline.Marker, Node> markerMap = new HashMap<>();
@@ -86,7 +85,6 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
 
   public TimelineSkin(Timeline control) {
     super(control, new TimelineBehavior(control));
-    this.control = control;
     root = new VBox(2);
     track = new Pane();
     track.minHeightProperty().bind(root.minHeightProperty());
@@ -149,6 +147,9 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
       }
     });
     control.progressProperty().addListener((__, old, progress) -> {
+      if (getSkinnable().getMarkers().isEmpty()) {
+        return;
+      }
       final double o = old.doubleValue();
       final double p = progress.doubleValue();
       markerPositions.entrySet().stream()
@@ -295,6 +296,7 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
   }
 
   private void startAnimation() {
+    Timeline control = getSkinnable();
     animation.getKeyFrames().setAll(
         new KeyFrame(Duration.ZERO, new KeyValue(control.progressProperty(), control.getStart())),
         new KeyFrame(control.getLength(), new KeyValue(control.progressProperty(), control.getEnd()))
@@ -368,6 +370,7 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
   }
 
   private Path createProgressHandle() {
+    Timeline control = getSkinnable();
     Path handle = new Path(
         new MoveTo(-5, -7),
         new LineTo(5, -7),
@@ -388,6 +391,7 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
   }
 
   private void makeDraggable(Node handle) {
+    Timeline control = getSkinnable();
     handle.setOnMousePressed(__ -> control.setPlaying(false));
     handle.setOnMouseDragged(e -> {
       Point2D cur = handle.localToParent(e.getX(), e.getY());
@@ -402,15 +406,15 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
   }
 
   private Duration progressToTime(double progress) {
+    Timeline control = getSkinnable();
     return control.getLength().multiply(progress / (control.getEnd() - control.getStart()));
   }
 
   @Override
   public void dispose() {
-    control.getMarkers().removeListener(markerListChangeListener);
+    getSkinnable().getMarkers().removeListener(markerListChangeListener);
     markerMap.clear();
     markerPositions.clear();
-    control = null;
     root = null;
   }
 
