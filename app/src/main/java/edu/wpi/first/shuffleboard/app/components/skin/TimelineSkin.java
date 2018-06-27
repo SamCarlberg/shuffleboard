@@ -22,6 +22,7 @@ import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -94,6 +95,9 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
     root.setMinHeight(20);
     root.setMaxHeight(20);
     track.getStyleClass().add("track");
+    track.setOnMousePressed(e -> {
+      getBehavior().focus();
+    });
     root.getChildren().add(track);
     timelineLength = control.endProperty().subtract(control.startProperty());
     markerListChangeListener = c -> {
@@ -122,20 +126,15 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
     progressHandle.layoutXProperty().bind(
         control.progressProperty().divide(timelineLength).multiply(track.widthProperty()));
 
-    control.playingProperty().addListener((__, was, is) -> {
-      if (is && control.isAnimated()) {
+    InvalidationListener animationListener = __ -> {
+      if (control.isAnimated() && control.isPlaying()) {
         startAnimation();
       } else {
         animation.stop();
       }
-    });
-    control.animatedProperty().addListener((__, was, is) -> {
-      if (is && control.isPlaying()) {
-        startAnimation();
-      } else {
-        animation.stop();
-      }
-    });
+    };
+    control.playingProperty().addListener(animationListener);
+    control.animatedProperty().addListener(animationListener);
     control.loopPlaybackProperty().addListener((__, was, doLoop) -> {
       animation.setCycleCount(doLoop ? -1 : 1);
       if (control.isPlaying() && control.isAnimated()) {
@@ -171,7 +170,7 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
             markerMap.get(marker).pseudoClassStateChanged(current, true);
             lastMarker = marker;
           });
-      if (tempView) {
+      if (tempView || lastMarker == null) {
         return;
       }
       tempView = false;
@@ -352,6 +351,7 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
     handle.getStyleClass().add("marker-handle");
     handle.setOnMousePressed(__ -> {
       tempView = false;
+      getBehavior().focus();
       getBehavior().moveToMarker(marker);
       detail.setText(makeText(marker));
     });
@@ -402,8 +402,12 @@ public class TimelineSkin extends BehaviorSkinBase<Timeline, TimelineBehavior> {
 
   private void makeDraggable(Node handle) {
     Timeline control = getSkinnable();
-    handle.setOnMousePressed(__ -> control.setPlaying(false));
+    handle.setOnMousePressed(__ -> {
+      getBehavior().focus();
+      control.setPlaying(false);
+    });
     handle.setOnMouseDragged(e -> {
+      getBehavior().focus();
       Point2D cur = handle.localToParent(e.getX(), e.getY());
       double dragPos = cur.getX();
       double progress = Utils.clamp(

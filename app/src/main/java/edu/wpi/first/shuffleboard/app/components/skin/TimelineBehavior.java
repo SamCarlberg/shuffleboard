@@ -61,6 +61,16 @@ public class TimelineBehavior extends BehaviorBase<Timeline> {
   }
 
   /**
+   * Gives the control focus. Should be called by the skin when the control is pressed on with a mouse button.
+   */
+  public void focus() {
+    Timeline timeline = getControl();
+    if (!timeline.isFocused()) {
+      timeline.requestFocus();
+    }
+  }
+
+  /**
    * Sets the control's progress to the closest marker prior to the current progress value. Does nothing if there is no
    * such marker.
    */
