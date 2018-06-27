@@ -2,7 +2,7 @@ package edu.wpi.first.shuffleboard.app.components.skin;
 
 import edu.wpi.first.shuffleboard.app.components.Timeline;
 
-import com.sun.javafx.scene.control.skin.BehaviorSkinBase;
+import com.github.samcarlberg.fxbehaviors.BehaviorSkinBase;
 import com.sun.javafx.util.Utils;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;

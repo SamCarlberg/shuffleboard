@@ -30,6 +30,7 @@ dependencies {
     compile(project(path = ":plugins:powerup"))
     compile(group = "de.huxhorn.lilith", name = "de.huxhorn.lilith.3rdparty.junique", version = "1.0.4")
     compile(group = "com.github.samcarlberg", name = "update-checker", version = "+")
+    compile(group = "com.github.samcarlberg", name = "fxbehaviors", version = "0.1.0-java8") // TODO remove java8 classifier when we move to Java 10/11
     compile(group = "com.github.zafarkhaja", name = "java-semver", version = "0.9.0")
     compile(group = "org.apache.commons", name = "commons-csv", version = "1.5")
     compile(group = "de.jensd", name = "fontawesomefx", version = "8.9")

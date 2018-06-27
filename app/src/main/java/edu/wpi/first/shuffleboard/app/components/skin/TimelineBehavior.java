@@ -2,62 +2,47 @@ package edu.wpi.first.shuffleboard.app.components.skin;
 
 import edu.wpi.first.shuffleboard.app.components.Timeline;
 
-import com.google.common.collect.ImmutableList;
-import com.sun.javafx.scene.control.behavior.BehaviorBase;
-import com.sun.javafx.scene.control.behavior.KeyBinding;
+import com.github.samcarlberg.fxbehaviors.BehaviorBase;
+import com.github.samcarlberg.fxbehaviors.InputBindings;
+import com.github.samcarlberg.fxbehaviors.KeyBinding;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.function.BiFunction;
 
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 
-public class TimelineBehavior extends BehaviorBase<Timeline> {
+public class TimelineBehavior extends BehaviorBase<Timeline, TimelineBehavior> {
 
-  private static final String PREV_MARKER = "PreviousMarker";
-  private static final String NEXT_MARKER = "NextMarker";
-  private static final String FIRST_MARKER = "FirstMarker";
-  private static final String LAST_MARKER = "LastMarker";
-  private static final String TOGGLE_PLAYING = "TogglePlaying";
-
-  private static final List<KeyBinding> keyBindings = ImmutableList.of(
-      new KeyBinding(KeyCode.LEFT, PREV_MARKER),
-      new KeyBinding(KeyCode.KP_LEFT, PREV_MARKER),
-      new KeyBinding(KeyCode.RIGHT, NEXT_MARKER),
-      new KeyBinding(KeyCode.KP_RIGHT, NEXT_MARKER),
-      new KeyBinding(KeyCode.HOME, FIRST_MARKER),
-      new KeyBinding(KeyCode.LEFT, FIRST_MARKER).ctrl(),
-      new KeyBinding(KeyCode.END, LAST_MARKER),
-      new KeyBinding(KeyCode.RIGHT, LAST_MARKER).ctrl(),
-      new KeyBinding(KeyCode.SPACE, TOGGLE_PLAYING)
+  private static final InputBindings<TimelineBehavior> bindings = InputBindings.of(
+      KeyBinding.<TimelineBehavior>builder()
+          .withKey(KeyCode.LEFT)
+          .withKey(KeyCode.KP_LEFT)
+          .withAction(TimelineBehavior::previousMarker)
+          .build(),
+      KeyBinding.<TimelineBehavior>builder()
+          .withKey(KeyCode.RIGHT)
+          .withKey(KeyCode.KP_RIGHT)
+          .withAction(TimelineBehavior::nextMarker)
+          .build(),
+      KeyBinding.<TimelineBehavior>builder()
+          .withKey(KeyCode.HOME)
+          .withKey(KeyCode.LEFT, KeyCombination.CONTROL_DOWN)
+          .withAction(TimelineBehavior::firstMarker)
+          .build(),
+      KeyBinding.<TimelineBehavior>builder()
+          .withKey(KeyCode.END)
+          .withKey(KeyCode.RIGHT, KeyCombination.CONTROL_DOWN)
+          .withAction(TimelineBehavior::lastMarker)
+          .build(),
+      KeyBinding.<TimelineBehavior>builder()
+          .withKey(KeyCode.SPACE)
+          .withAction(TimelineBehavior::togglePlayback)
+          .build()
   );
 
   public TimelineBehavior(Timeline control) {
-    super(control, keyBindings);
-  }
-
-  @Override
-  protected void callAction(String name) {
-    switch (name) {
-      case PREV_MARKER:
-        previousMarker();
-        break;
-      case NEXT_MARKER:
-        nextMarker();
-        break;
-      case FIRST_MARKER:
-        firstMarker();
-        break;
-      case LAST_MARKER:
-        lastMarker();
-        break;
-      case TOGGLE_PLAYING:
-        togglePlayback();
-        break;
-      default:
-        super.callAction(name);
-        break;
-    }
+    super(control, bindings);
   }
 
   /**
