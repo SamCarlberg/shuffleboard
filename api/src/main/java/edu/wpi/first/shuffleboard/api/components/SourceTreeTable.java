@@ -73,7 +73,7 @@ public class SourceTreeTable<S extends SourceEntry, V> extends TreeTableView<S> 
    * @param entry the entry to update
    */
   public void updateEntry(S entry) {
-    makeBranches(entry, false);
+    makeBranches(entry, false, true);
   }
 
   /**
@@ -82,16 +82,20 @@ public class SourceTreeTable<S extends SourceEntry, V> extends TreeTableView<S> 
    * @param entry the entry to remove
    */
   public void removeEntry(S entry) {
-    makeBranches(entry, true);
+    makeBranches(entry, true, true);
   }
 
   /**
    * Creates, updates, or deletes tree nodes in the network table view.
    *
-   * @param entry   the entry that should be updated
-   * @param deleted {@code true} if the entry was deleted, {@code false} otherwise
+   * @param entry         the entry that should be updated
+   * @param deleted       {@code true} if the entry was deleted, {@code false} otherwise
+   * @param sortIfChanged if the tree should be sorted at the end of the method if the structure of the tree changed.
+   *                      If this is set to {@code false}, then be sure to call {@link #sort()} at some later point to
+   *                      make sure the entries at in the correct order. This is useful to disable if many entries are
+   *                      expected to change at once to eliminate many redundant {@code sort()} calls.
    */
-  private void makeBranches(S entry, boolean deleted) {
+  protected void makeBranches(S entry, boolean deleted, boolean sortIfChanged) {
     final SourceType sourceType = getSourceType();
     String name = entry.getName();
     List<String> hierarchy = NetworkTable.getHierarchy(name);
@@ -153,7 +157,7 @@ public class SourceTreeTable<S extends SourceEntry, V> extends TreeTableView<S> 
         current.setValue(entry);
       }
     }
-    if (structureChanged) {
+    if (structureChanged && sortIfChanged) {
       sort();
     }
   }

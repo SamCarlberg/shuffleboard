@@ -6,10 +6,13 @@ import edu.wpi.first.shuffleboard.api.sources.DataSource;
 import edu.wpi.first.shuffleboard.api.sources.DataSourceUtils;
 import edu.wpi.first.shuffleboard.api.sources.SourceEntry;
 import edu.wpi.first.shuffleboard.api.sources.SourceType;
+import edu.wpi.first.shuffleboard.api.util.Debouncer;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
 import edu.wpi.first.shuffleboard.api.widget.Component;
 import edu.wpi.first.shuffleboard.api.widget.Components;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -32,6 +35,11 @@ public final class InteractiveSourceTree extends SourceTreeTable<SourceEntry, Ob
 
   private final Consumer<Component> addComponentToActiveTab;
   private SourceEntry selectedEntry; // NOPMD could be final - false positive. PMD doesn't seem to know what a lambda is
+
+  private final Debouncer updateDebouncer = new Debouncer(this::updateEntries, Duration.ofMillis(20));
+  private final Object updateLock = new Object();
+  private final List<SourceEntry> updates = new ArrayList<>();
+  private final List<SourceEntry> deletes = new ArrayList<>();
 
   /**
    * Creates a new interactive source tree.
@@ -89,19 +97,46 @@ public final class InteractiveSourceTree extends SourceTreeTable<SourceEntry, Ob
     sourceType.getAvailableSources().addListener((MapChangeListener<String, Object>) change -> {
       SourceEntry entry = sourceType.createSourceEntryForUri(change.getKey());
       if (DataSourceUtils.isNotMetadata(entry.getName())) {
-        if (change.wasAdded()) {
-          updateEntry(entry);
-        } else if (change.wasRemoved()) {
-          removeEntry(entry);
+        synchronized (updateLock) {
+          if (change.wasAdded()) {
+            updates.add(entry);
+          } else if (change.wasRemoved()) {
+            deletes.add(entry);
+          }
+          updateDebouncer.run();
         }
       }
     });
 
-    // Update when the available sources chaneg
+    // Update when the available sources change
     sourceType.getAvailableSourceUris().stream()
         .filter(DataSourceUtils::isNotMetadata)
         .map(sourceType::createSourceEntryForUri)
-        .forEach(this::updateEntry);
+        .forEach(e -> {
+          synchronized (updateLock) {
+            updates.add(e);
+            updateDebouncer.run();
+          }
+        });
+  }
+
+  private void updateEntries() {
+    FxUtils.runOnFxThread(() -> {
+      synchronized (updateLock) {
+        for (SourceEntry update : updates) {
+          if (deletes.contains(update)) {
+            continue;
+          }
+          makeBranches(update, false, false);
+        }
+        for (SourceEntry delete : deletes) {
+          makeBranches(delete, true, false);
+        }
+        sort();
+        updates.clear();
+        deletes.clear();
+      }
+    });
   }
 
   /**
