@@ -10,9 +10,9 @@ subprojects {
                 releaseType = ReleaseType.DEV
             }
         }
-        plugins {
-            id("edu.wpi.first.wpilib.versioning.WPILibVersioningPlugin") version "2.0"
-            `java-library`
+        apply {
+            plugin("java-library")
+            plugin("edu.wpi.first.wpilib.versioning.WPILibVersioningPlugin")
         }
         dependencies {
             compileOnly(group = "com.google.code.findbugs", name = "annotations", version = "+")

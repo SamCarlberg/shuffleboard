@@ -70,8 +70,6 @@ public class Shuffleboard extends Application {
       throw alreadyLockedException;
     }
 
-    Loggers.setupLoggers();
-
     // Install SVG image loaders so SVGs can be used like any other image
     SvgImageLoaderFactory.install();
 

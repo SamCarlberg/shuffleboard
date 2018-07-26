@@ -2,8 +2,6 @@ package edu.wpi.first.shuffleboard.app;
 
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
 
-import org.controlsfx.tools.Utils;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -34,7 +32,7 @@ public class PreloaderController {
     backgroundContainer.setTranslateY(-HEXAGON_RADIUS);
 
     progressBar.setProgress(-1);
-    versionLabel.setText(Shuffleboard.getVersion());
+    versionLabel.setText(ShuffleboardPreloader.class.getPackage().getImplementationVersion());
 
     // Hexagon grid background
     HexagonGrid hexagonGrid = new HexagonGrid(
@@ -57,7 +55,7 @@ public class PreloaderController {
   }
 
   public void setProgress(double progress) {
-    progressBar.setProgress(Utils.clamp(0, progress, 1));
+    progressBar.setProgress(progress < 0 ? 0 : progress > 1 ? 1 : progress);
   }
 
 }

@@ -59,8 +59,6 @@ final class Loggers {
     fileHandler.setFormatter(new SimpleFormatter()); //log in text, not xml
 
     globalLogger.config("Configuration done."); //Log that we are done setting up the logger
-    globalLogger.config("Shuffleboard app version: " + Shuffleboard.getVersion());
-    globalLogger.config("Running from " + Shuffleboard.getRunningLocation());
   }
 
 }

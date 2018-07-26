@@ -20,6 +20,8 @@ import edu.wpi.cscore.CameraServerJNI;
 
 import org.opencv.core.Core;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -38,7 +40,25 @@ public class CameraServerPlugin extends Plugin {
 
   @Override
   public void onLoad() {
+    try {
+      // Workaround. CameraServer depends on OpenCV 3.2.0, but JavaCV uses 3.4.1. The latter overrides the former,
+      // so we need to revert it so that cscore will function.
+      Field version = Core.class.getField("VERSION");
+      Field modifiers = Field.class.getDeclaredField("modifiers");
+      modifiers.setAccessible(true);
+      modifiers.set(version, version.getModifiers() & ~Modifier.FINAL);
+      version.setAccessible(true);
+      version.set(null, "3.2.0");
+      Field native_library_name = Core.class.getField("NATIVE_LIBRARY_NAME");
+      modifiers.set(native_library_name, native_library_name.getModifiers() & ~Modifier.FINAL);
+      native_library_name.setAccessible(true);
+      native_library_name.set(null, "opencv_java320");
+    } catch (ReflectiveOperationException e) {
+      e.printStackTrace();
+    }
     log.info("OpenCV version: " + Core.VERSION);
+    log.info("OpenCV core library name: " + Core.NATIVE_LIBRARY_NAME);
+    log.info("OpenCV library location: " + Core.class.getProtectionDomain().getCodeSource().getLocation());
     // Make sure the JNI is loaded. If it's not, this plugin can't work!
     // Calling a function from CameraServerJNI will extract the OpenCV JNI dependencies and load them
     CameraServerJNI.setTelemetryPeriod(1);
