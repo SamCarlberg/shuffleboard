@@ -47,6 +47,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 /**
  * Controller for the main UI window.
@@ -223,6 +224,7 @@ public class MainWindowController {
       setDashboard(new DashboardTabPane(tabInfo));
     }
     centerSplitPane.setDividerPositions(dividerPositions);
+    ((Stage) root.getScene().getWindow()).setTitle("Shuffleboard");
   }
 
   /**
@@ -230,7 +232,13 @@ public class MainWindowController {
    */
   @FXML
   public void load() throws IOException {
-    setDashboard(saveFileHandler.load());
+    DashboardData data = saveFileHandler.load();
+    if (data != null) {
+      setDashboard(data);
+      String fileName = saveFileHandler.getCurrentFile().getName();
+      String nameNoExtension = fileName.substring(0, fileName.length() - 5); // Extension is 5 chars (".json")
+      ((Stage) root.getScene().getWindow()).setTitle("Shuffleboard - " + nameNoExtension);
+    }
   }
 
   @FXML

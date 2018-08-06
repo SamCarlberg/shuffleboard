@@ -122,6 +122,13 @@ public final class SaveFileHandler {
   }
 
   /**
+   * Gets the current save file.
+   */
+  public File getCurrentFile() {
+    return currentFile;
+  }
+
+  /**
    * Clears the current file status.
    */
   public void clear() {
