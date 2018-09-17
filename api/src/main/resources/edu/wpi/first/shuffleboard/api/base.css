@@ -5,7 +5,7 @@
  * through all themes (like the tile highlight) or use CSS variables to make   *
  * them easy to reskin.                                                        *
  ******************************************************************************/
-@import "material.css";
+@import "/edu/wpi/first/desktop/theme/material.css";
 
 /*******************************************************************************
  *                                                                             *
