@@ -1,6 +1,6 @@
 package edu.wpi.first.shuffleboard.app.components;
 
-import edu.wpi.first.shuffleboard.api.prefs.Category;
+import edu.wpi.first.desktop.settings.Category;
 import edu.wpi.first.shuffleboard.api.tab.model.ComponentModel;
 import edu.wpi.first.shuffleboard.api.tab.model.LayoutModel;
 import edu.wpi.first.shuffleboard.api.tab.model.ParentModel;

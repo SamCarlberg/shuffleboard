@@ -1,6 +1,6 @@
 package edu.wpi.first.shuffleboard.api.widget;
 
-import edu.wpi.first.shuffleboard.api.prefs.Group;
+import edu.wpi.first.desktop.settings.Group;
 
 import java.util.List;
 import java.util.stream.Stream;

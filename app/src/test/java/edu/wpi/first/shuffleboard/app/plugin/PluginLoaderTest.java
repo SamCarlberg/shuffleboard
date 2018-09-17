@@ -2,14 +2,11 @@ package edu.wpi.first.shuffleboard.app.plugin;
 
 import edu.wpi.first.shuffleboard.api.data.DataType;
 import edu.wpi.first.shuffleboard.api.data.DataTypes;
-import edu.wpi.first.shuffleboard.api.plugin.Description;
 import edu.wpi.first.shuffleboard.api.plugin.Plugin;
-import edu.wpi.first.shuffleboard.api.plugin.Requires;
 import edu.wpi.first.shuffleboard.api.sources.SourceType;
 import edu.wpi.first.shuffleboard.api.sources.SourceTypes;
 import edu.wpi.first.shuffleboard.api.sources.recording.Converters;
 import edu.wpi.first.shuffleboard.api.tab.TabInfo;
-import edu.wpi.first.shuffleboard.api.theme.Theme;
 import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.widget.Component;
 import edu.wpi.first.shuffleboard.api.widget.ComponentType;
@@ -21,6 +18,10 @@ import edu.wpi.first.shuffleboard.testplugins.DependentOnUnknownPlugin;
 import com.github.zafarkhaja.semver.Version;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
+import edu.wpi.first.desktop.plugin.Description;
+import edu.wpi.first.desktop.plugin.Requires;
+import edu.wpi.first.desktop.theme.Theme;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -304,7 +305,7 @@ public class PluginLoaderTest {
   /**
    * A mock plugin for testing.
    */
-  @Description(group = "test", name = "MockPlugin", version = "0.0.0", summary = "A plugin for testing")
+  @Description(groupId = "test", name = "MockPlugin", version = "0.0.0", summary = "A plugin for testing")
   public static final class MockPlugin extends Plugin {
 
     private static final DataType<Object> dataType = new DataType<Object>("Mock Data", Object.class) {
@@ -337,7 +338,7 @@ public class PluginLoaderTest {
       }
     };
 
-    private static final Theme theme = new Theme("Mock Theme");
+    private static final Theme theme = new Theme("Mock Theme", new String[0]);
     private static final SourceType sourceType = new SourceType("Mock Source", false, "mock://", null) {
       @Override
       public DataType<?> dataTypeForSource(DataTypes registry, String sourceUri) {
@@ -371,42 +372,42 @@ public class PluginLoaderTest {
     }
   }
 
-  @Description(group = "test", name = "MockPlugin", version = "9.9.9", summary = "A newer version of the mock plugin")
+  @Description(groupId = "test", name = "MockPlugin", version = "9.9.9", summary = "A newer version of the mock plugin")
   public static final class NewerVersionPlugin extends Plugin {
   }
 
   /**
    * A plugin that depends on another plugin.
    */
-  @Description(group = "test", name = "Dependent Plugin", version = "0.0.0", summary = "")
-  @Requires(group = "test", name = "MockPlugin", minVersion = "0.0.0")
+  @Description(groupId = "test", name = "Dependent Plugin", version = "0.0.0", summary = "")
+  @Requires(groupId = "test", name = "MockPlugin", minVersion = "0.0.0")
   public static final class DependentPlugin extends Plugin {
   }
 
   /**
    * A plugin that depends on another plugin, but requires a higher version than the one that gets loaded.
    */
-  @Description(group = "test", name = "DependentOnHigherVersion", version = "0.0.0", summary = "")
-  @Requires(group = "test", name = "MockPlugin", minVersion = "999999.999999.999999")
+  @Description(groupId = "test", name = "DependentOnHigherVersion", version = "0.0.0", summary = "")
+  @Requires(groupId = "test", name = "MockPlugin", minVersion = "999999.999999.999999")
   public static class DependentOnHigherVersion extends Plugin {
   }
 
-  @Description(group = "test", name = "CyclicalPluginA", version = "0.0.0", summary = "")
-  @Requires(group = "test", name = "CyclicalPluginB", minVersion = "0.0.0")
+  @Description(groupId = "test", name = "CyclicalPluginA", version = "0.0.0", summary = "")
+  @Requires(groupId = "test", name = "CyclicalPluginB", minVersion = "0.0.0")
   private static class CyclicalPluginA extends Plugin {
   }
 
-  @Description(group = "test", name = "CyclicalPluginB", version = "0.0.0", summary = "")
-  @Requires(group = "test", name = "CyclicalPluginA", minVersion = "0.0.0")
+  @Description(groupId = "test", name = "CyclicalPluginB", version = "0.0.0", summary = "")
+  @Requires(groupId = "test", name = "CyclicalPluginA", minVersion = "0.0.0")
   private static final class CyclicalPluginB extends Plugin {
   }
 
-  @Description(group = "test", name = "SelfDependentPlugin", version = "0.0.0", summary = "")
-  @Requires(group = "test", name = "SelfDependentPlugin", minVersion = "0.0.0")
+  @Description(groupId = "test", name = "SelfDependentPlugin", version = "0.0.0", summary = "")
+  @Requires(groupId = "test", name = "SelfDependentPlugin", minVersion = "0.0.0")
   private static final class SelfDependentPlugin extends Plugin {
   }
 
-  @Description(group = "test", name = "DefaultTabsPlugin", version = "0.0.0", summary = "")
+  @Description(groupId = "test", name = "DefaultTabsPlugin", version = "0.0.0", summary = "")
   private static final class DefaultTabsPlugin extends Plugin {
 
     private static final TabInfo tabInfo = new TabInfo("tabName", false, "sourcePrefix");

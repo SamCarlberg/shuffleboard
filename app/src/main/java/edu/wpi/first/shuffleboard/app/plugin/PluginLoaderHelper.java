@@ -1,13 +1,14 @@
 package edu.wpi.first.shuffleboard.app.plugin;
 
-import edu.wpi.first.shuffleboard.api.plugin.Description;
 import edu.wpi.first.shuffleboard.api.plugin.InvalidPluginDefinitionException;
-import edu.wpi.first.shuffleboard.api.plugin.Plugin;
-import edu.wpi.first.shuffleboard.api.plugin.Requirements;
-import edu.wpi.first.shuffleboard.api.plugin.Requires;
 
 import com.github.zafarkhaja.semver.Version;
 import com.google.common.annotations.VisibleForTesting;
+
+import edu.wpi.first.desktop.plugin.AnnotatedPlugin;
+import edu.wpi.first.desktop.plugin.Description;
+import edu.wpi.first.desktop.plugin.Requirements;
+import edu.wpi.first.desktop.plugin.Requires;
 
 import java.util.List;
 import java.util.Objects;
@@ -45,7 +46,7 @@ final class PluginLoaderHelper {
    *
    * @throws InvalidPluginDefinitionException if the plugin class does not have a {@code @Description} annotation
    */
-  public static Description getDescription(Class<? extends Plugin> pluginClass)
+  public static Description getDescription(Class<? extends AnnotatedPlugin> pluginClass)
       throws InvalidPluginDefinitionException {
     if (pluginClass.isAnnotationPresent(Description.class)) {
       return pluginClass.getAnnotation(Description.class);
@@ -63,7 +64,7 @@ final class PluginLoaderHelper {
    *
    * @return a list of the direct plugin requirements of a plugin class
    */
-  public static List<Requires> getRequirements(Class<? extends Plugin> pluginClass) {
+  public static List<Requires> getRequirements(Class<? extends AnnotatedPlugin> pluginClass) {
     Requirements requirements = pluginClass.getAnnotation(Requirements.class);
     Requires[] requires = pluginClass.getAnnotationsByType(Requires.class);
     return Stream.concat(

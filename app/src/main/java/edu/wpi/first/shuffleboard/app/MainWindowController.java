@@ -1,10 +1,9 @@
 package edu.wpi.first.shuffleboard.app;
 
 import edu.wpi.first.shuffleboard.api.plugin.Plugin;
-import edu.wpi.first.shuffleboard.api.prefs.Category;
 import edu.wpi.first.shuffleboard.api.sources.recording.Recorder;
 import edu.wpi.first.shuffleboard.api.tab.TabInfo;
-import edu.wpi.first.shuffleboard.api.theme.Theme;
+import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
 import edu.wpi.first.shuffleboard.api.util.Storage;
 import edu.wpi.first.shuffleboard.api.util.ThreadUtils;
@@ -19,10 +18,11 @@ import edu.wpi.first.shuffleboard.app.dialogs.PrefsDialog;
 import edu.wpi.first.shuffleboard.app.dialogs.RestartPromptDialog;
 import edu.wpi.first.shuffleboard.app.dialogs.UpdateDownloadDialog;
 import edu.wpi.first.shuffleboard.app.plugin.PluginLoader;
-import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
-import edu.wpi.first.shuffleboard.app.prefs.SettingsDialog;
 import edu.wpi.first.shuffleboard.app.sources.recording.Playback;
 import edu.wpi.first.shuffleboard.app.tab.TabInfoRegistry;
+
+import edu.wpi.first.desktop.settings.Category;
+import edu.wpi.first.desktop.settings.SettingsDialog;
 
 import org.fxmisc.easybind.EasyBind;
 
@@ -38,7 +38,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -79,9 +78,6 @@ public class MainWindowController {
 
   private final SaveFileHandler saveFileHandler = new SaveFileHandler();
 
-  private final ObservableValue<List<String>> stylesheets
-      = EasyBind.map(AppPreferences.getInstance().themeProperty(), Theme::getStyleSheets);
-
   private final ShuffleboardUpdateChecker shuffleboardUpdateChecker = new ShuffleboardUpdateChecker();
   private final ExecutorService updateCheckingExecutor
       = Executors.newSingleThreadExecutor(ThreadUtils::makeDaemonThread);
@@ -92,7 +88,6 @@ public class MainWindowController {
         EasyBind.map(
             Recorder.getInstance().runningProperty(),
             running -> running ? "Stop recording" : "Start recording"));
-    FxUtils.bind(root.getStylesheets(), stylesheets);
 
     log.info("Setting up plugins in the UI");
     PluginLoader.getDefault().getLoadedPlugins().forEach(this::tearDownPluginWhenUnloaded);
@@ -312,7 +307,7 @@ public class MainWindowController {
         .map(DashboardTab::getSettings)
         .collect(Collectors.toList());
     SettingsDialog dialog = new SettingsDialog(categories);
-    dialog.getDialogPane().getStylesheets().setAll(stylesheets.getValue());
+    Themes.getDefault().getThemeManager().addNode(dialog.getDialogPane());
     dialog.setTitle("Tab Preferences");
     dialog.showAndWait();
   }
@@ -382,7 +377,7 @@ public class MainWindowController {
 
   private void showFailureAlert(ShuffleboardUpdateChecker.Result<Path> result) {
     Alert failureAlert = new Alert(Alert.AlertType.ERROR);
-    FxUtils.bind(failureAlert.getDialogPane().getStylesheets(), stylesheets);
+    Themes.getDefault().getThemeManager().addNode(failureAlert.getDialogPane());
     failureAlert.setTitle("Update failed");
     failureAlert.setContentText("Error: " + result.getError().getMessage() + "\nSee the log for detailed information");
     failureAlert.showAndWait();

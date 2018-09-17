@@ -3,7 +3,6 @@ package edu.wpi.first.shuffleboard.plugin.base;
 import edu.wpi.first.shuffleboard.api.data.DataType;
 import edu.wpi.first.shuffleboard.api.data.DataTypes;
 import edu.wpi.first.shuffleboard.api.json.ElementTypeAdapter;
-import edu.wpi.first.shuffleboard.api.plugin.Description;
 import edu.wpi.first.shuffleboard.api.plugin.Plugin;
 import edu.wpi.first.shuffleboard.api.tab.TabInfo;
 import edu.wpi.first.shuffleboard.api.widget.ComponentType;
@@ -62,12 +61,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import edu.wpi.first.desktop.plugin.Description;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 @Description(
-    group = "edu.wpi.first.shuffleboard",
+    groupId = "edu.wpi.first.shuffleboard",
     name = "Base",
     version = "1.0.2",
     summary = "Defines all the WPILib data types and stock widgets"

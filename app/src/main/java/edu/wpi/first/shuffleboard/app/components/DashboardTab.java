@@ -2,15 +2,12 @@ package edu.wpi.first.shuffleboard.app.components;
 
 import edu.wpi.first.shuffleboard.api.Populatable;
 import edu.wpi.first.shuffleboard.api.data.DataTypes;
-import edu.wpi.first.shuffleboard.api.prefs.Category;
-import edu.wpi.first.shuffleboard.api.prefs.FlushableProperty;
-import edu.wpi.first.shuffleboard.api.prefs.Group;
-import edu.wpi.first.shuffleboard.api.prefs.Setting;
 import edu.wpi.first.shuffleboard.api.sources.DataSource;
 import edu.wpi.first.shuffleboard.api.sources.DataSourceUtils;
 import edu.wpi.first.shuffleboard.api.sources.SourceType;
 import edu.wpi.first.shuffleboard.api.sources.SourceTypes;
 import edu.wpi.first.shuffleboard.api.tab.TabInfo;
+import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.util.Debouncer;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
 import edu.wpi.first.shuffleboard.api.util.TypeUtils;
@@ -19,9 +16,12 @@ import edu.wpi.first.shuffleboard.api.widget.ComponentContainer;
 import edu.wpi.first.shuffleboard.api.widget.Components;
 import edu.wpi.first.shuffleboard.api.widget.Sourced;
 import edu.wpi.first.shuffleboard.app.Autopopulator;
-import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
-import edu.wpi.first.shuffleboard.app.prefs.SettingsDialog;
 
+import edu.wpi.first.desktop.property.FlushableProperty;
+import edu.wpi.first.desktop.settings.Category;
+import edu.wpi.first.desktop.settings.Group;
+import edu.wpi.first.desktop.settings.Setting;
+import edu.wpi.first.desktop.settings.SettingsDialog;
 import edu.wpi.first.networktables.NetworkTable;
 
 import org.fxmisc.easybind.EasyBind;
@@ -151,9 +151,9 @@ public class DashboardTab extends Tab implements HandledTab, Populatable {
    * Shows a dialog for editing the properties of this tab.
    */
   public void showPrefsDialog() {
-    Category category = getSettings();
-    SettingsDialog dialog = new SettingsDialog(category);
-    dialog.getDialogPane().getStylesheets().setAll(AppPreferences.getInstance().getTheme().getStyleSheets());
+    SettingsDialog dialog = new SettingsDialog();
+    dialog.setRootCategories(List.of(getSettings()));
+    Themes.getDefault().getThemeManager().addNode(dialog.getDialogPane());
     dialog.titleProperty().bind(EasyBind.map(this.title, t -> t + " Preferences"));
     dialog.showAndWait();
   }

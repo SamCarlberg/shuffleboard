@@ -1,13 +1,14 @@
 package edu.wpi.first.shuffleboard.app.prefs;
 
-import edu.wpi.first.shuffleboard.api.prefs.Category;
-import edu.wpi.first.shuffleboard.api.prefs.Group;
-import edu.wpi.first.shuffleboard.api.prefs.Setting;
-import edu.wpi.first.shuffleboard.api.theme.Theme;
 import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.util.PreferencesUtils;
 
 import com.google.common.annotations.VisibleForTesting;
+
+import edu.wpi.first.desktop.settings.Category;
+import edu.wpi.first.desktop.settings.Group;
+import edu.wpi.first.desktop.settings.Setting;
+import edu.wpi.first.desktop.theme.Theme;
 
 import java.io.File;
 import java.util.prefs.Preferences;
@@ -71,6 +72,8 @@ public final class AppPreferences {
     autoLoadLastSaveFile.addListener(__ -> PreferencesUtils.save(autoLoadLastSaveFile, preferences));
     confirmExit.addListener(__ -> PreferencesUtils.save(confirmExit, preferences));
     checkForUpdatesOnStartup.addListener(__ -> PreferencesUtils.save(checkForUpdatesOnStartup, preferences));
+
+    Themes.getDefault().getThemeManager().themeProperty().bind(theme);
   }
 
   public static AppPreferences getInstance() {

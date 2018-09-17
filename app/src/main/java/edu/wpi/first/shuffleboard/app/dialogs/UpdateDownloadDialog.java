@@ -1,9 +1,9 @@
 package edu.wpi.first.shuffleboard.app.dialogs;
 
+import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
 import edu.wpi.first.shuffleboard.api.util.LazyInit;
 import edu.wpi.first.shuffleboard.app.DownloadDialogController;
-import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
 
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -28,7 +28,7 @@ public final class UpdateDownloadDialog {
     stage.initModality(Modality.APPLICATION_MODAL);
     stage.initStyle(StageStyle.UNDECORATED);
     stage.setScene(new Scene(pane));
-    stage.getScene().getStylesheets().setAll(AppPreferences.getInstance().getTheme().getStyleSheets());
+    Themes.getDefault().getThemeManager().addScene(stage.getScene());
     pane.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
       if (event.getCode() == KeyCode.ESCAPE) {
         stage.close();

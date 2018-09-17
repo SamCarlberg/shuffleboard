@@ -4,6 +4,10 @@ import edu.wpi.first.shuffleboard.api.util.Registry;
 import edu.wpi.first.shuffleboard.api.util.Storage;
 import edu.wpi.first.shuffleboard.api.util.TypeUtils;
 
+import edu.wpi.first.desktop.theme.Theme;
+import edu.wpi.first.desktop.theme.ThemeContainer;
+import edu.wpi.first.desktop.theme.ThemeManager;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -31,6 +35,9 @@ public final class Themes extends Registry<Theme> {
   public static final Theme MIDNIGHT = new Theme("Midnight", "/edu/wpi/first/shuffleboard/app/midnight.css");
 
   public static final Theme INITIAL_THEME = MATERIAL_LIGHT;
+
+  private final ThemeManager themeManager = new ThemeManager();
+  private final ThemeContainer themeContainer = new ThemeContainer();
 
   /**
    * Gets the default themes instance.
@@ -60,9 +67,7 @@ public final class Themes extends Registry<Theme> {
    * @param name the name of the theme to get
    */
   public Theme forName(String name) {
-    return getItems().stream()
-        .filter(t -> t.getName().equals(name))
-        .findFirst()
+    return themeContainer.getTheme(name)
         .orElse(INITIAL_THEME);
   }
 
@@ -73,11 +78,13 @@ public final class Themes extends Registry<Theme> {
       throw new IllegalArgumentException("Theme " + theme + " is already registered");
     }
     addItem(theme);
+    themeContainer.addTheme(theme);
   }
 
   @Override
   public void unregister(Theme theme) {
     removeItem(theme);
+    themeContainer.removeTheme(theme);
   }
 
   /**
@@ -134,4 +141,11 @@ public final class Themes extends Registry<Theme> {
     }
   }
 
+  public ThemeManager getThemeManager() {
+    return themeManager;
+  }
+
+  public ThemeContainer getThemeContainer() {
+    return themeContainer;
+  }
 }

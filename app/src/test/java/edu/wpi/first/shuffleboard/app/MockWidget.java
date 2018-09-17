@@ -1,7 +1,7 @@
 package edu.wpi.first.shuffleboard.app;
 
 import edu.wpi.first.shuffleboard.api.data.IncompatibleSourceException;
-import edu.wpi.first.shuffleboard.api.prefs.Group;
+import edu.wpi.first.desktop.settings.Group;
 import edu.wpi.first.shuffleboard.api.sources.DataSource;
 import edu.wpi.first.shuffleboard.api.widget.Widget;
 

@@ -1,12 +1,12 @@
 package edu.wpi.first.shuffleboard.app;
 
 import edu.wpi.first.shuffleboard.api.components.ShuffleboardDialog;
+import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
 import edu.wpi.first.shuffleboard.api.util.OsDetector;
 import edu.wpi.first.shuffleboard.api.util.ShutdownHooks;
 import edu.wpi.first.shuffleboard.api.util.Storage;
 import edu.wpi.first.shuffleboard.api.util.ThreadUtils;
-import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
 
 import com.github.samcarlberg.updatechecker.Repo;
 import com.github.samcarlberg.updatechecker.UpdateChecker;
@@ -115,7 +115,7 @@ public final class ShuffleboardUpdateChecker {
     ShuffleboardDialog dialog = ShuffleboardDialog.createForFxml(
         Shuffleboard.class.getResource("UpToDateDialogPane.fxml"));
     dialog.setCloseOnFocusLost(true);
-    dialog.getDialogPane().getStylesheets().setAll(AppPreferences.getInstance().getTheme().getStyleSheets());
+    Themes.getDefault().getThemeManager().addNode(dialog.getDialogPane());
     dialog.setHeaderText("Up to date");
     Platform.runLater(dialog.getDialogPane()::requestFocus);
     scheduledExecutorService.schedule(() -> Platform.runLater(dialog::closeAndCancel), 5, TimeUnit.SECONDS);
@@ -126,7 +126,7 @@ public final class ShuffleboardUpdateChecker {
     ShuffleboardDialog dialog = ShuffleboardDialog.createForFxml(
         Shuffleboard.class.getResource("ErrorDialogPane.fxml"));
     dialog.setCloseOnFocusLost(false);
-    dialog.getDialogPane().getStylesheets().setAll(AppPreferences.getInstance().getTheme().getStyleSheets());
+    Themes.getDefault().getThemeManager().addNode(dialog.getDialogPane());
     dialog.setHeaderText("No connection");
     Platform.runLater(dialog.getDialogPane()::requestFocus);
     scheduledExecutorService.schedule(() -> Platform.runLater(dialog::closeAndCancel), 10, TimeUnit.SECONDS);
@@ -144,7 +144,7 @@ public final class ShuffleboardUpdateChecker {
       UpdatePromptController controller = FxUtils.getController(dialog.getDialogPane().getContent());
       controller.setCurrentVersion(Shuffleboard.getSemverVersion());
       controller.setNewestVersion(newestVersion);
-      dialog.getDialogPane().getStylesheets().setAll(AppPreferences.getInstance().getTheme().getStyleSheets());
+      Themes.getDefault().getThemeManager().addNode(dialog.getDialogPane());
 
       ButtonType accept = new ButtonType("Download", ButtonBar.ButtonData.YES);
       ButtonType decline = new ButtonType("No thanks", ButtonBar.ButtonData.NO);

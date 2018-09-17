@@ -2,8 +2,8 @@ package edu.wpi.first.shuffleboard.plugin.base.widget;
 
 import eu.hansolo.medusa.Gauge;
 
-import edu.wpi.first.shuffleboard.api.prefs.Group;
-import edu.wpi.first.shuffleboard.api.prefs.Setting;
+import edu.wpi.first.desktop.settings.Group;
+import edu.wpi.first.desktop.settings.Setting;
 import edu.wpi.first.shuffleboard.api.widget.Description;
 import edu.wpi.first.shuffleboard.api.widget.ParametrizedController;
 import edu.wpi.first.shuffleboard.api.widget.SimpleAnnotatedWidget;

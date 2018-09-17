@@ -115,6 +115,7 @@ public class Shuffleboard extends Application {
     onOtherAppStart = () -> Platform.runLater(primaryStage::toFront);
 
     primaryStage.setScene(new Scene(mainPane));
+    Themes.getDefault().getThemeManager().addScene(primaryStage.getScene());
 
     // Setup the dashboard tabs after all plugins are loaded
     Platform.runLater(() -> {
@@ -143,7 +144,7 @@ public class Shuffleboard extends Application {
       }
       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
       alert.setTitle("Save layout");
-      alert.getDialogPane().getScene().getStylesheets().setAll(mainPane.getStylesheets());
+      Themes.getDefault().getThemeManager().addNode(alert.getDialogPane());
       alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
       alert.getDialogPane().setHeaderText("Save the current layout before closing?");
       alert.showAndWait().ifPresent(bt -> {

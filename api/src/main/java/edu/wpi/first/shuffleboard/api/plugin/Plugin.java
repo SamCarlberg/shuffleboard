@@ -2,14 +2,11 @@ package edu.wpi.first.shuffleboard.api.plugin;
 
 import edu.wpi.first.shuffleboard.api.data.DataType;
 import edu.wpi.first.shuffleboard.api.json.ElementTypeAdapter;
-import edu.wpi.first.shuffleboard.api.prefs.Group;
-import edu.wpi.first.shuffleboard.api.prefs.Setting;
 import edu.wpi.first.shuffleboard.api.sources.SourceType;
 import edu.wpi.first.shuffleboard.api.sources.recording.Converter;
 import edu.wpi.first.shuffleboard.api.sources.recording.serialization.TypeAdapter;
 import edu.wpi.first.shuffleboard.api.tab.TabInfo;
 import edu.wpi.first.shuffleboard.api.tab.model.TabStructure;
-import edu.wpi.first.shuffleboard.api.theme.Theme;
 import edu.wpi.first.shuffleboard.api.util.Storage;
 import edu.wpi.first.shuffleboard.api.widget.ComponentType;
 
@@ -17,6 +14,15 @@ import com.github.zafarkhaja.semver.ParseException;
 import com.github.zafarkhaja.semver.Version;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
+import edu.wpi.first.desktop.plugin.AnnotatedPlugin;
+import edu.wpi.first.desktop.plugin.Description;
+import edu.wpi.first.desktop.plugin.Requirements;
+import edu.wpi.first.desktop.plugin.Requires;
+import edu.wpi.first.desktop.property.FlushableProperty;
+import edu.wpi.first.desktop.settings.Group;
+import edu.wpi.first.desktop.settings.Setting;
+import edu.wpi.first.desktop.theme.Theme;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +56,7 @@ import javafx.beans.property.SimpleBooleanProperty;
  * annotation for which the latter is a wrapper; as such, it is recommended to use {@code @Requires} annotations to
  * increase readability.
  */
-public class Plugin {
+public class Plugin implements AnnotatedPlugin<ShuffleboardContext> {
 
   private final String groupId;
   private final String name;
@@ -70,7 +76,7 @@ public class Plugin {
     validatePluginClass(getClass());
     Description description = getClass().getAnnotation(Description.class);
 
-    this.groupId = description.group();
+    this.groupId = description.groupId();
     this.name = description.name();
     this.version = Version.valueOf(description.version());
     this.summary = description.summary();
@@ -89,7 +95,7 @@ public class Plugin {
       throw new InvalidPluginDefinitionException(
           "The plugin class does not have a @Description annotation: " + pluginClass.getName());
     }
-    String group = description.group();
+    String group = description.groupId();
     if (group.contains(":")) {
       throw new InvalidPluginDefinitionException("The group ID cannot contain a colon (:) character: " + group);
     }
@@ -150,6 +156,20 @@ public class Plugin {
     return summary;
   }
 
+  @Override
+  public void applyTo(ShuffleboardContext target) {
+    target.getComponents().registerAll(getComponents());
+    target.getConverters().registerAll(getRecordingConverters());
+    target.getDataTypes().registerAll(getDataTypes());
+    target.getSourceTypes().registerAll(getSourceTypes());
+    target.getThemes().registerAll(getThemes());
+  }
+
+  @Override
+  public void removeFrom(ShuffleboardContext target) {
+
+  }
+
   /**
    * Called when a plugin is loaded. Defaults to do nothing; plugins that require logic to be performed when they're
    * loaded (for example, connecting to a server) should be run here.
@@ -207,7 +227,7 @@ public class Plugin {
   /**
    * Gets a list of properties of this plugin that can be changed by users. Properties that are sensitive to rapid
    * changes (for example, a server URI that will attempt a connection on a change) should be wrapped in a
-   * {@link edu.wpi.first.shuffleboard.api.prefs.FlushableProperty FlushableProperty} to ensure that a change will only
+   * {@link FlushableProperty FlushableProperty} to ensure that a change will only
    * occur when a user manually confirms the change.
    *
    * @deprecated use {@link #getSettings()} instead
@@ -220,7 +240,7 @@ public class Plugin {
   /**
    * Gets the user-configurable settings for this plugin. Properties that are sensitive to rapid
    * changes (for example, a server URI that will attempt a connection on a change) should be wrapped in a
-   * {@link edu.wpi.first.shuffleboard.api.prefs.FlushableProperty FlushableProperty} to ensure that a change will only
+   * {@link FlushableProperty FlushableProperty} to ensure that a change will only
    * occur when a user manually confirms the change.
    */
   public List<Group> getSettings() {

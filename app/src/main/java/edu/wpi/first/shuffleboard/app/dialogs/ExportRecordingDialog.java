@@ -1,9 +1,9 @@
 package edu.wpi.first.shuffleboard.app.dialogs;
 
+import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
 import edu.wpi.first.shuffleboard.api.util.LazyInit;
 import edu.wpi.first.shuffleboard.app.ConvertRecordingPaneController;
-import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
 
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
@@ -23,8 +23,8 @@ public final class ExportRecordingDialog {
     stage = new Stage();
     stage.setTitle("Export Recording Files");
     stage.setScene(new Scene(pane.get()));
+    Themes.getDefault().getThemeManager().addScene(stage.getScene());
     stage.setResizable(false);
-    pane.get().getStylesheets().setAll(AppPreferences.getInstance().getTheme().getStyleSheets());
     stage.initModality(Modality.APPLICATION_MODAL);
     initialized = true;
   }

@@ -2,7 +2,6 @@ package edu.wpi.first.shuffleboard.app.plugin;
 
 import edu.wpi.first.shuffleboard.api.data.DataTypes;
 import edu.wpi.first.shuffleboard.api.data.IncompatibleSourceException;
-import edu.wpi.first.shuffleboard.api.plugin.Description;
 import edu.wpi.first.shuffleboard.api.plugin.InvalidPluginDefinitionException;
 import edu.wpi.first.shuffleboard.api.plugin.Plugin;
 import edu.wpi.first.shuffleboard.api.sources.DataSource;
@@ -20,6 +19,8 @@ import edu.wpi.first.shuffleboard.app.tab.TabInfoRegistry;
 import com.github.zafarkhaja.semver.Version;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
+
+import edu.wpi.first.desktop.plugin.Description;
 
 import java.io.File;
 import java.io.IOException;
@@ -330,7 +331,7 @@ public class PluginLoader {
   private static boolean isDirectRequirement(Class<? extends Plugin> pluginA, Class<? extends Plugin> pluginB) {
     Description description = PluginLoaderHelper.getDescription(pluginB);
     return PluginLoaderHelper.getRequirements(pluginA).stream()
-        .filter(d -> d.group().equals(description.group()))
+        .filter(d -> d.groupId().equals(description.groupId()))
         .filter(d -> d.name().equals(description.name()))
         .map(d -> Version.valueOf(d.minVersion()))
         .anyMatch(v -> PluginLoaderHelper.isCompatible(Version.valueOf(description.version()), v));
@@ -353,7 +354,7 @@ public class PluginLoader {
         && PluginLoaderHelper.getRequirements(plugin.getClass()).stream()
         .allMatch(a ->
             loadedPlugins.stream()
-                .filter(p -> p.getGroupId().equals(a.group()) && p.getName().equals(a.name()))
+                .filter(p -> p.getGroupId().equals(a.groupId()) && p.getName().equals(a.name()))
                 .anyMatch(p ->
                     PluginLoaderHelper.isCompatible(
                         p.getVersion(),

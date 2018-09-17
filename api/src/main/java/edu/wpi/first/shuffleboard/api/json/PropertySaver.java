@@ -1,7 +1,5 @@
 package edu.wpi.first.shuffleboard.api.json;
 
-import edu.wpi.first.shuffleboard.api.prefs.Group;
-import edu.wpi.first.shuffleboard.api.prefs.Setting;
 import edu.wpi.first.shuffleboard.api.properties.SavePropertyFrom;
 import edu.wpi.first.shuffleboard.api.properties.SaveThisProperty;
 import edu.wpi.first.shuffleboard.api.util.ReflectionUtils;
@@ -10,6 +8,9 @@ import edu.wpi.first.shuffleboard.api.widget.Component;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
+
+import edu.wpi.first.desktop.settings.Group;
+import edu.wpi.first.desktop.settings.Setting;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

@@ -3,9 +3,6 @@ package edu.wpi.first.shuffleboard.app;
 import edu.wpi.first.shuffleboard.api.components.ActionList;
 import edu.wpi.first.shuffleboard.api.data.DataType;
 import edu.wpi.first.shuffleboard.api.dnd.DataFormats;
-import edu.wpi.first.shuffleboard.api.prefs.Category;
-import edu.wpi.first.shuffleboard.api.prefs.Group;
-import edu.wpi.first.shuffleboard.api.prefs.Setting;
 import edu.wpi.first.shuffleboard.api.sources.DataSource;
 import edu.wpi.first.shuffleboard.api.sources.SourceTypes;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
@@ -28,8 +25,12 @@ import edu.wpi.first.shuffleboard.app.components.WidgetTile;
 import edu.wpi.first.shuffleboard.app.dnd.TileDragResizer;
 import edu.wpi.first.shuffleboard.app.json.SourcedRestorer;
 import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
-import edu.wpi.first.shuffleboard.app.prefs.SettingsDialog;
 import edu.wpi.first.shuffleboard.app.sources.DestroyedSource;
+
+import edu.wpi.first.desktop.settings.Category;
+import edu.wpi.first.desktop.settings.Group;
+import edu.wpi.first.desktop.settings.Setting;
+import edu.wpi.first.desktop.settings.SettingsDialog;
 
 import org.fxmisc.easybind.EasyBind;
 
@@ -588,10 +589,11 @@ public class WidgetPaneController {
    * @param categories the root categories to display in the settings dialog
    */
   private void showSettingsDialog(List<Category> categories) {
-    SettingsDialog dialog = new SettingsDialog(categories);
+    SettingsDialog dialog = new SettingsDialog();
+    dialog.setRootCategories(categories);
 
     dialog.setTitle("Edit Properties");
-    dialog.getDialogPane().getStylesheets().setAll(AppPreferences.getInstance().getTheme().getStyleSheets());
+    dialog.getDialogPane().getStylesheets().setAll(AppPreferences.getInstance().getTheme().getStyleSheetPaths());
 
     dialog.showAndWait();
   }

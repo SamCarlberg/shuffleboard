@@ -1,10 +1,10 @@
 package edu.wpi.first.shuffleboard.app.dialogs;
 
 import edu.wpi.first.shuffleboard.api.components.ShuffleboardDialog;
+import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
 import edu.wpi.first.shuffleboard.api.util.LazyInit;
 import edu.wpi.first.shuffleboard.app.MainWindowController;
-import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ButtonBar;
@@ -29,7 +29,7 @@ public final class RestartPromptDialog {
     ShuffleboardDialog dialog = new ShuffleboardDialog(pane.get());
     dialog.setHeaderText("Update Downloaded");
     dialog.initOwner(primaryWindow);
-    dialog.getDialogPane().getStylesheets().setAll(AppPreferences.getInstance().getTheme().getStyleSheets());
+    Themes.getDefault().getThemeManager().addNode(dialog.getDialogPane());
     ButtonType restartNow = new ButtonType("Restart now", ButtonBar.ButtonData.YES);
     ButtonType later = new ButtonType("Later", ButtonBar.ButtonData.NO);
     dialog.getDialogPane().getButtonTypes().addAll(restartNow, later);

@@ -14,4 +14,5 @@ dependencies {
     api(group = "de.codecentric.centerdevice", name = "javafxsvg", version = "1.2.1")
     api(group = "eu.hansolo", name = "Medusa", version = "7.9") // Note the capital 'M' -- lowercase is a much older version!
     api(group = "com.github.zafarkhaja", name = "java-semver", version = "0.9.0")
+    api(group = "edu.wpi.first.desktop", name = "desktop-common", version = "+")
 }

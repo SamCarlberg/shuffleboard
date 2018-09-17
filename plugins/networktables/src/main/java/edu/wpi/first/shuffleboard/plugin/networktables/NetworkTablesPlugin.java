@@ -3,11 +3,7 @@ package edu.wpi.first.shuffleboard.plugin.networktables;
 import edu.wpi.first.shuffleboard.api.DashboardMode;
 import edu.wpi.first.shuffleboard.api.data.DataType;
 import edu.wpi.first.shuffleboard.api.data.DataTypes;
-import edu.wpi.first.shuffleboard.api.plugin.Description;
 import edu.wpi.first.shuffleboard.api.plugin.Plugin;
-import edu.wpi.first.shuffleboard.api.prefs.FlushableProperty;
-import edu.wpi.first.shuffleboard.api.prefs.Group;
-import edu.wpi.first.shuffleboard.api.prefs.Setting;
 import edu.wpi.first.shuffleboard.api.sources.SourceType;
 import edu.wpi.first.shuffleboard.api.sources.recording.Recorder;
 import edu.wpi.first.shuffleboard.api.tab.model.TabStructure;
@@ -20,6 +16,10 @@ import edu.wpi.first.shuffleboard.plugin.networktables.util.NetworkTableUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import edu.wpi.first.desktop.plugin.Description;
+import edu.wpi.first.desktop.property.FlushableProperty;
+import edu.wpi.first.desktop.settings.Group;
+import edu.wpi.first.desktop.settings.Setting;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTablesJNI;
 
@@ -33,7 +33,7 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 
 @Description(
-    group = "edu.wpi.first.shuffleboard",
+    groupId = "edu.wpi.first.shuffleboard",
     name = "NetworkTables",
     version = "2.0.0",
     summary = "Provides sources and widgets for NetworkTables"

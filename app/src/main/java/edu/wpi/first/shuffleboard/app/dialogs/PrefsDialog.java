@@ -1,27 +1,24 @@
 package edu.wpi.first.shuffleboard.app.dialogs;
 
 import edu.wpi.first.shuffleboard.api.plugin.Plugin;
-import edu.wpi.first.shuffleboard.api.prefs.Category;
-import edu.wpi.first.shuffleboard.api.prefs.Group;
-import edu.wpi.first.shuffleboard.api.prefs.Setting;
-import edu.wpi.first.shuffleboard.api.theme.Theme;
-import edu.wpi.first.shuffleboard.api.util.FxUtils;
+import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.util.TypeUtils;
 import edu.wpi.first.shuffleboard.app.components.DashboardTab;
 import edu.wpi.first.shuffleboard.app.components.DashboardTabPane;
 import edu.wpi.first.shuffleboard.app.plugin.PluginLoader;
 import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
-import edu.wpi.first.shuffleboard.app.prefs.SettingsDialog;
 
 import com.google.common.collect.ImmutableList;
 
-import org.fxmisc.easybind.EasyBind;
+import edu.wpi.first.desktop.settings.Category;
+import edu.wpi.first.desktop.settings.Group;
+import edu.wpi.first.desktop.settings.Setting;
+import edu.wpi.first.desktop.settings.SettingsDialog;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Dialog;
 
 /**
@@ -31,14 +28,11 @@ public final class PrefsDialog {
 
   private static final String DIALOG_TITLE = "Shuffleboard Preferences";
 
-  private final ObservableValue<List<String>> stylesheets
-      = EasyBind.map(AppPreferences.getInstance().themeProperty(), Theme::getStyleSheets);
-
   /**
    * Shows the preferences dialog.
    */
   public void show(DashboardTabPane tabPane) {
-    Dialog<Boolean> dialog = createDialog(tabPane);
+    Dialog dialog = createDialog(tabPane);
     dialog.showAndWait();
   }
 
@@ -64,8 +58,9 @@ public final class PrefsDialog {
             )
         ));
 
-    SettingsDialog dialog = new SettingsDialog(appSettings, plugins, tabs);
-    FxUtils.bind(dialog.getDialogPane().getStylesheets(), stylesheets);
+    SettingsDialog dialog = new SettingsDialog();
+    dialog.setRootCategories(List.of(appSettings, plugins, tabs));
+    Themes.getDefault().getThemeManager().addNode(dialog.getDialogPane());
     dialog.setTitle(DIALOG_TITLE);
     return dialog;
   }

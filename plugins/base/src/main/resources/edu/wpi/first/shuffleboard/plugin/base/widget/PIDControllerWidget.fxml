@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import edu.wpi.first.shuffleboard.api.components.NumberField?>
+<?import edu.wpi.first.desktop.component.NumberField?>
 <?import org.controlsfx.control.ToggleSwitch?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>

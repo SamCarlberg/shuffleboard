@@ -1,8 +1,5 @@
 package edu.wpi.first.shuffleboard.plugin.base.widget;
 
-import edu.wpi.first.shuffleboard.api.components.ExtendedPropertySheet;
-import edu.wpi.first.shuffleboard.api.prefs.Group;
-import edu.wpi.first.shuffleboard.api.prefs.Setting;
 import edu.wpi.first.shuffleboard.api.sources.DataSourceUtils;
 import edu.wpi.first.shuffleboard.api.util.AlphanumComparator;
 import edu.wpi.first.shuffleboard.api.widget.Description;
@@ -11,6 +8,11 @@ import edu.wpi.first.shuffleboard.api.widget.SimpleAnnotatedWidget;
 import edu.wpi.first.shuffleboard.plugin.base.data.RobotPreferencesData;
 
 import com.google.common.collect.ImmutableList;
+
+import edu.wpi.first.desktop.component.SettingsSheet;
+import edu.wpi.first.desktop.settings.Group;
+import edu.wpi.first.desktop.settings.Setting;
+import edu.wpi.first.desktop.settings.SettingsItem;
 
 import org.controlsfx.control.PropertySheet;
 
@@ -37,7 +39,7 @@ public class RobotPreferencesWidget extends SimpleAnnotatedWidget<RobotPreferenc
   @FXML
   private Pane root;
   @FXML
-  private PropertySheet propertySheet;
+  private SettingsSheet propertySheet;
 
   // Keep map of properties
   // If we just used the data map in the property sheet, a new item (and editor) would be created for each change
@@ -47,6 +49,8 @@ public class RobotPreferencesWidget extends SimpleAnnotatedWidget<RobotPreferenc
 
   private static final Comparator<PropertySheet.Item> itemSorter =
       Comparator.comparing(i -> i.getName().toLowerCase(Locale.US), AlphanumComparator.INSTANCE);
+
+  private final Group group = Group.of("Robot Preferences");
 
   @FXML
   private void initialize() {
@@ -68,7 +72,7 @@ public class RobotPreferencesWidget extends SimpleAnnotatedWidget<RobotPreferenc
 
     wrapperProperties.addListener((MapChangeListener<String, ObjectProperty<? super Object>>) change -> {
       if (change.wasAdded()) {
-        propertySheet.getItems().add(new ExtendedPropertySheet.PropertyItem<>(change.getValueAdded(), change.getKey()));
+        propertySheet.getItems().add(new SettingsItem(group, Setting.of(change.getKey(), change.getValueAdded())));
       } else if (change.wasRemoved()) {
         propertySheet.getItems().removeIf(i -> i.getName().equals(change.getKey()));
       }

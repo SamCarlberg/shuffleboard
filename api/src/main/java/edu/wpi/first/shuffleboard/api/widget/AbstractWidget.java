@@ -1,10 +1,11 @@
 package edu.wpi.first.shuffleboard.api.widget;
 
 import edu.wpi.first.shuffleboard.api.data.IncompatibleSourceException;
-import edu.wpi.first.shuffleboard.api.prefs.Group;
 import edu.wpi.first.shuffleboard.api.sources.DataSource;
 
 import com.google.common.collect.ImmutableList;
+
+import edu.wpi.first.desktop.settings.Group;
 
 import java.util.List;
 

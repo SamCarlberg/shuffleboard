@@ -1,11 +1,11 @@
 package edu.wpi.first.shuffleboard.app.dialogs;
 
 import edu.wpi.first.shuffleboard.api.components.ShuffleboardDialog;
+import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
 import edu.wpi.first.shuffleboard.api.util.LazyInit;
 import edu.wpi.first.shuffleboard.app.AboutDialogController;
 import edu.wpi.first.shuffleboard.app.Shuffleboard;
-import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
 
 import javafx.application.Platform;
 import javafx.scene.layout.Pane;
@@ -24,7 +24,7 @@ public final class AboutDialog {
     ShuffleboardDialog dialog = new ShuffleboardDialog(pane.get(), true);
     dialog.setHeaderText("WPILib Shuffleboard");
     dialog.setSubheaderText(Shuffleboard.getVersion());
-    dialog.getDialogPane().getStylesheets().setAll(AppPreferences.getInstance().getTheme().getStyleSheets());
+    Themes.getDefault().getThemeManager().addNode(dialog.getDialogPane());
     Platform.runLater(dialog.getDialogPane()::requestFocus);
     dialog.showAndWait();
   }

@@ -1,9 +1,9 @@
 package edu.wpi.first.shuffleboard.app.dialogs;
 
+import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
 import edu.wpi.first.shuffleboard.api.util.LazyInit;
 import edu.wpi.first.shuffleboard.app.PluginPaneController;
-import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
 
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -33,11 +33,11 @@ public final class PluginDialog {
       }
     });
     stage.setScene(new Scene(pane.get()));
+    Themes.getDefault().getThemeManager().addScene(stage.getScene());
     stage.sizeToScene();
     stage.setMinWidth(675);
     stage.setMinHeight(325);
     stage.setTitle("Loaded Plugins");
-    pane.get().getStylesheets().setAll(AppPreferences.getInstance().getTheme().getStyleSheets());
   }
 
   /**

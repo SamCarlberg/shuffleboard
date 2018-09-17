@@ -114,6 +114,7 @@ allprojects {
     }
     repositories {
         mavenCentral()
+        mavenLocal()
     }
 
     project.ext {

@@ -2,8 +2,8 @@ package edu.wpi.first.shuffleboard.app.json;
 
 import edu.wpi.first.shuffleboard.api.data.DataTypes;
 import edu.wpi.first.shuffleboard.api.data.types.AllType;
-import edu.wpi.first.shuffleboard.api.prefs.Group;
-import edu.wpi.first.shuffleboard.api.prefs.Setting;
+import edu.wpi.first.desktop.settings.Group;
+import edu.wpi.first.desktop.settings.Setting;
 import edu.wpi.first.shuffleboard.api.properties.SavePropertyFrom;
 import edu.wpi.first.shuffleboard.api.properties.SaveThisProperty;
 import edu.wpi.first.shuffleboard.api.sources.SourceTypes;

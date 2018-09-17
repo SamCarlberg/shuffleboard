@@ -1,8 +1,8 @@
 package edu.wpi.first.shuffleboard.plugin.cameraserver.widget;
 
-import edu.wpi.first.shuffleboard.api.components.IntegerField;
-import edu.wpi.first.shuffleboard.api.prefs.Group;
-import edu.wpi.first.shuffleboard.api.prefs.Setting;
+import edu.wpi.first.desktop.component.IntegerField;
+import edu.wpi.first.desktop.settings.Group;
+import edu.wpi.first.desktop.settings.Setting;
 import edu.wpi.first.shuffleboard.api.properties.SavePropertyFrom;
 import edu.wpi.first.shuffleboard.api.widget.Description;
 import edu.wpi.first.shuffleboard.api.widget.ParametrizedController;
