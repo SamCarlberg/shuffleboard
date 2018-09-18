@@ -57,6 +57,7 @@ public final class Themes extends Registry<Theme> {
    * @param initial the initial themes
    */
   public Themes(Theme... initial) {
+    themeContainer.removeTheme(Theme.MODENA); // Don't want people selecting an unusable theme :)
     registerAll(initial);
   }
 
@@ -143,5 +144,9 @@ public final class Themes extends Registry<Theme> {
 
   public ThemeManager getThemeManager() {
     return themeManager;
+  }
+
+  public ThemeContainer getThemeContainer() {
+    return themeContainer;
   }
 }

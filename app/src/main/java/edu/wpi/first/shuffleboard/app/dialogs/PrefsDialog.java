@@ -10,16 +10,23 @@ import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
 
 import com.google.common.collect.ImmutableList;
 
+import edu.wpi.first.desktop.component.SettingsSheet;
+import edu.wpi.first.desktop.component.editor.ThemePropertyEditor;
 import edu.wpi.first.desktop.settings.Category;
 import edu.wpi.first.desktop.settings.Group;
 import edu.wpi.first.desktop.settings.Setting;
 import edu.wpi.first.desktop.settings.SettingsDialog;
+import edu.wpi.first.desktop.theme.Theme;
+
+import org.controlsfx.control.PropertySheet;
+import org.controlsfx.property.editor.PropertyEditor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javafx.scene.control.Dialog;
+import javafx.util.Callback;
 
 /**
  * Dialog for editing application and plugin preferences.
@@ -27,6 +34,13 @@ import javafx.scene.control.Dialog;
 public final class PrefsDialog {
 
   private static final String DIALOG_TITLE = "Shuffleboard Preferences";
+
+  private static final Callback<PropertySheet.Item, PropertyEditor<?>> propertyEditorFactory = item -> {
+    if (item.getType() == Theme.class) {
+      return new ThemePropertyEditor(Themes.getDefault().getThemeContainer(), item);
+    }
+    return SettingsSheet.DEFAULT_EDITOR_FACTORY.call(item);
+  };
 
   /**
    * Shows the preferences dialog.
@@ -60,7 +74,8 @@ public final class PrefsDialog {
 
     SettingsDialog dialog = new SettingsDialog();
     dialog.setRootCategories(List.of(appSettings, plugins, tabs));
-    Themes.getDefault().getThemeManager().addNode(dialog.getDialogPane());
+    dialog.setPropertyEditorFactory(propertyEditorFactory);
+    Themes.getDefault().getThemeManager().addScene(dialog.getDialogPane().getScene());
     dialog.setTitle(DIALOG_TITLE);
     return dialog;
   }
