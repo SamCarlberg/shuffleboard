@@ -19,7 +19,7 @@ import edu.wpi.first.shuffleboard.app.dialogs.RestartPromptDialog;
 import edu.wpi.first.shuffleboard.app.dialogs.UpdateDownloadDialog;
 import edu.wpi.first.shuffleboard.app.plugin.PluginLoader;
 import edu.wpi.first.shuffleboard.app.sources.recording.Playback;
-import edu.wpi.first.shuffleboard.app.tab.TabInfoRegistry;
+import edu.wpi.first.shuffleboard.api.tab.TabInfoRegistry;
 
 import edu.wpi.first.desktop.settings.Category;
 import edu.wpi.first.desktop.settings.SettingsDialog;

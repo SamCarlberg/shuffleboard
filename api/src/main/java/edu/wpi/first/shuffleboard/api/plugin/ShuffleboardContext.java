@@ -3,6 +3,7 @@ package edu.wpi.first.shuffleboard.api.plugin;
 import edu.wpi.first.shuffleboard.api.data.DataTypes;
 import edu.wpi.first.shuffleboard.api.sources.SourceTypes;
 import edu.wpi.first.shuffleboard.api.sources.recording.Converters;
+import edu.wpi.first.shuffleboard.api.tab.TabInfoRegistry;
 import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.widget.Components;
 
@@ -13,6 +14,7 @@ public final class ShuffleboardContext {
   private final DataTypes dataTypes;
   private final SourceTypes sourceTypes;
   private final Themes themes;
+  private final TabInfoRegistry tabInfoRegistry;
 
   /**
    * Creates a shuffleboard context container.
@@ -21,12 +23,14 @@ public final class ShuffleboardContext {
                              Converters converters,
                              DataTypes dataTypes,
                              SourceTypes sourceTypes,
-                             Themes themes) {
+                             Themes themes,
+                             TabInfoRegistry tabInfoRegistry) {
     this.components = components;
     this.converters = converters;
     this.dataTypes = dataTypes;
     this.sourceTypes = sourceTypes;
     this.themes = themes;
+    this.tabInfoRegistry = tabInfoRegistry;
   }
 
   public Components getComponents() {
@@ -47,5 +51,9 @@ public final class ShuffleboardContext {
 
   public Themes getThemes() {
     return themes;
+  }
+
+  public TabInfoRegistry getTabInfoRegistry() {
+    return tabInfoRegistry;
   }
 }

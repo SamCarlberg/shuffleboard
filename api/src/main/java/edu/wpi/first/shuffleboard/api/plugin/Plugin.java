@@ -4,6 +4,7 @@ import edu.wpi.first.shuffleboard.api.data.DataType;
 import edu.wpi.first.shuffleboard.api.json.ElementTypeAdapter;
 import edu.wpi.first.shuffleboard.api.sources.SourceType;
 import edu.wpi.first.shuffleboard.api.sources.recording.Converter;
+import edu.wpi.first.shuffleboard.api.sources.recording.serialization.Serializers;
 import edu.wpi.first.shuffleboard.api.sources.recording.serialization.TypeAdapter;
 import edu.wpi.first.shuffleboard.api.tab.TabInfo;
 import edu.wpi.first.shuffleboard.api.tab.model.TabStructure;
@@ -158,16 +159,29 @@ public class Plugin implements AnnotatedPlugin<ShuffleboardContext> {
 
   @Override
   public void applyTo(ShuffleboardContext target) {
-    target.getComponents().registerAll(getComponents());
-    target.getConverters().registerAll(getRecordingConverters());
     target.getDataTypes().registerAll(getDataTypes());
+    target.getComponents().registerAll(getComponents());
+    getDefaultComponents().forEach(target.getComponents()::setDefaultComponent);
+    target.getConverters().registerAll(getRecordingConverters());
     target.getSourceTypes().registerAll(getSourceTypes());
     target.getThemes().registerAll(getThemes());
+    target.getTabInfoRegistry().registerAll(getDefaultTabInfo());
+    getTypeAdapters().forEach(Serializers::add);
+    onLoad();
+    setLoaded(true);
   }
 
   @Override
   public void removeFrom(ShuffleboardContext target) {
-
+    target.getComponents().unregisterAll(getComponents());
+    target.getConverters().unregisterAll(getRecordingConverters());
+    target.getDataTypes().unregisterAll(getDataTypes());
+    target.getSourceTypes().unregisterAll(getSourceTypes());
+    target.getThemes().unregisterAll(getThemes());
+    target.getTabInfoRegistry().unregisterAll(getDefaultTabInfo());
+    getTypeAdapters().forEach(Serializers::remove);
+    onUnload();
+    setLoaded(false);
   }
 
   /**

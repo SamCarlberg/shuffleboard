@@ -144,8 +144,4 @@ public final class Themes extends Registry<Theme> {
   public ThemeManager getThemeManager() {
     return themeManager;
   }
-
-  public ThemeContainer getThemeContainer() {
-    return themeContainer;
-  }
 }

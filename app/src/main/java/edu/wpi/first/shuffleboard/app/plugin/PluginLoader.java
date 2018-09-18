@@ -4,17 +4,17 @@ import edu.wpi.first.shuffleboard.api.data.DataTypes;
 import edu.wpi.first.shuffleboard.api.data.IncompatibleSourceException;
 import edu.wpi.first.shuffleboard.api.plugin.InvalidPluginDefinitionException;
 import edu.wpi.first.shuffleboard.api.plugin.Plugin;
+import edu.wpi.first.shuffleboard.api.plugin.ShuffleboardContext;
 import edu.wpi.first.shuffleboard.api.sources.DataSource;
 import edu.wpi.first.shuffleboard.api.sources.SourceTypes;
 import edu.wpi.first.shuffleboard.api.sources.recording.Converters;
-import edu.wpi.first.shuffleboard.api.sources.recording.serialization.Serializers;
+import edu.wpi.first.shuffleboard.api.tab.TabInfoRegistry;
 import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.widget.Components;
 import edu.wpi.first.shuffleboard.api.widget.SingleSourceWidget;
 import edu.wpi.first.shuffleboard.api.widget.Widget;
 import edu.wpi.first.shuffleboard.app.sources.DataTypeChangedException;
 import edu.wpi.first.shuffleboard.app.sources.DestroyedSource;
-import edu.wpi.first.shuffleboard.app.tab.TabInfoRegistry;
 
 import com.github.zafarkhaja.semver.Version;
 import com.google.common.annotations.VisibleForTesting;
@@ -36,7 +36,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
@@ -52,50 +51,29 @@ public class PluginLoader {
 
   private static final Logger log = Logger.getLogger(PluginLoader.class.getName());
 
-  private static final PluginLoader defaultLoader =
-      new PluginLoader(
-          DataTypes.getDefault(),
-          SourceTypes.getDefault(),
-          Components.getDefault(),
-          Themes.getDefault(),
-          TabInfoRegistry.getDefault(),
-          Converters.getDefault());
+  private static final ShuffleboardContext defaultContext = new ShuffleboardContext(
+      Components.getDefault(),
+      Converters.getDefault(),
+      DataTypes.getDefault(),
+      SourceTypes.getDefault(),
+      Themes.getDefault(),
+      TabInfoRegistry.getDefault()
+  );
+  private static final PluginLoader defaultLoader = new PluginLoader(defaultContext);
 
   private final ObservableSet<Plugin> loadedPlugins = FXCollections.observableSet(new LinkedHashSet<>());
   private final Set<Class<? extends Plugin>> knownPluginClasses = new HashSet<>();
   private final ObservableList<Plugin> knownPlugins = FXCollections.observableArrayList();
-  private final DataTypes dataTypes;
-  private final SourceTypes sourceTypes;
-  private final Components components;
-  private final Themes themes;
-  private final TabInfoRegistry tabInfoRegistry;
-  private final Converters converters;
+  private final ShuffleboardContext context;
 
   /**
    * Creates a new plugin loader object. For app use, use {@link #getDefault() the default instance}; this should only
    * be used for tests.
    *
-   * @param dataTypes       the data type registry to use for registering data types from plugins
-   * @param sourceTypes     the source type registry to use for registering source types from plugins
-   * @param components      the component registry to use for registering components from plugins
-   * @param themes          the theme registry to use for registering themes from plugins
-   * @param tabInfoRegistry the registry for tab information provided by plugins
-   * @param converters      the registry for custom recording file converters
-   *
    * @throws NullPointerException if any of the parameters is {@code null}
    */
-  public PluginLoader(DataTypes dataTypes,
-                      SourceTypes sourceTypes,
-                      Components components,
-                      Themes themes,
-                      TabInfoRegistry tabInfoRegistry,
-                      Converters converters) {
-    this.dataTypes = Objects.requireNonNull(dataTypes, "dataTypes");
-    this.sourceTypes = Objects.requireNonNull(sourceTypes, "sourceTypes");
-    this.components = Objects.requireNonNull(components, "components");
-    this.themes = Objects.requireNonNull(themes, "themes");
-    this.tabInfoRegistry = Objects.requireNonNull(tabInfoRegistry, "tabInfoRegistry");
-    this.converters = converters;
+  public PluginLoader(ShuffleboardContext context) {
+    this.context = context;
   }
 
   /**
@@ -272,30 +250,20 @@ public class PluginLoader {
       return false;
     }
     log.info("Loading plugin " + plugin.fullIdString());
-    dataTypes.registerAll(plugin.getDataTypes());
-    sourceTypes.registerAll(plugin.getSourceTypes());
-    plugin.getTypeAdapters().forEach(Serializers::add);
-    components.registerAll(plugin.getComponents());
-    plugin.getDefaultComponents().forEach(components::setDefaultComponent);
-    components.getActiveWidgets().stream()
+    plugin.applyTo(context);
+    context.getComponents().getActiveWidgets().stream()
         .filter(w -> w.getSources().stream().anyMatch(s -> s instanceof DestroyedSource))
         .filter(w -> {
           return plugin.getComponents().stream().anyMatch(t -> t.getType().equals(w.getClass()))
               || w.getSources().stream().anyMatch(s -> plugin.getDataTypes().contains(s.getDataType()))
               || w.getSources().stream().anyMatch(s -> plugin.getSourceTypes().contains(s.getType()));
         })
-        .filter(w -> w.getSources().stream().anyMatch(s -> sourceTypes.isRegistered(s.getType())))
+        .filter(w -> w.getSources().stream().anyMatch(s -> context.getSourceTypes().isRegistered(s.getType())))
         .forEach(w -> {
           w.getSources().stream()
               .filter(s -> s instanceof DestroyedSource)
               .forEach(s -> tryRestoreSource(w, (DestroyedSource) s));
         });
-    plugin.getThemes().forEach(themes::register);
-    tabInfoRegistry.registerAll(plugin.getDefaultTabInfo());
-    converters.registerAll(plugin.getRecordingConverters());
-
-    plugin.onLoad();
-    plugin.setLoaded(true);
 
     loadedPlugins.add(plugin);
     if (!knownPlugins.contains(plugin)) {
@@ -395,7 +363,7 @@ public class PluginLoader {
         .forEach(this::unload);
 
     log.info("Unloading plugin " + plugin.fullIdString());
-    components.getActiveWidgets().stream()
+    context.getComponents().getActiveWidgets().stream()
         .filter(w -> w.getSources().stream().anyMatch(s -> !(s instanceof DestroyedSource)))
         .filter(w -> {
           return w.getSources().stream().anyMatch(s -> plugin.getDataTypes().contains(s.getDataType()))
@@ -416,17 +384,8 @@ public class PluginLoader {
             });
           }
         });
-    components.unregisterAll(plugin.getComponents());
-    sourceTypes.unregisterAll(plugin.getSourceTypes());
-    plugin.getTypeAdapters().forEach(Serializers::remove);
-    dataTypes.unregisterAll(plugin.getDataTypes());
     // TODO figure out a good way to remember the theme & reapply it when reloading the plugin
-    themes.unregisterAll(plugin.getThemes());
-    tabInfoRegistry.unregisterAll(plugin.getDefaultTabInfo());
-    converters.unregisterAll(plugin.getRecordingConverters());
-
-    plugin.onUnload();
-    plugin.setLoaded(false);
+    plugin.removeFrom(context);
     loadedPlugins.remove(plugin);
     return true;
   }

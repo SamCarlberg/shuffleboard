@@ -3,15 +3,16 @@ package edu.wpi.first.shuffleboard.app.plugin;
 import edu.wpi.first.shuffleboard.api.data.DataType;
 import edu.wpi.first.shuffleboard.api.data.DataTypes;
 import edu.wpi.first.shuffleboard.api.plugin.Plugin;
+import edu.wpi.first.shuffleboard.api.plugin.ShuffleboardContext;
 import edu.wpi.first.shuffleboard.api.sources.SourceType;
 import edu.wpi.first.shuffleboard.api.sources.SourceTypes;
 import edu.wpi.first.shuffleboard.api.sources.recording.Converters;
 import edu.wpi.first.shuffleboard.api.tab.TabInfo;
+import edu.wpi.first.shuffleboard.api.tab.TabInfoRegistry;
 import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.widget.Component;
 import edu.wpi.first.shuffleboard.api.widget.ComponentType;
 import edu.wpi.first.shuffleboard.api.widget.Components;
-import edu.wpi.first.shuffleboard.app.tab.TabInfoRegistry;
 import edu.wpi.first.shuffleboard.testplugins.BasicPlugin;
 import edu.wpi.first.shuffleboard.testplugins.DependentOnUnknownPlugin;
 
@@ -54,12 +55,14 @@ public class PluginLoaderTest {
 
   @BeforeEach
   public void setup() {
+    components = new Components();
     dataTypes = new DataTypes();
     sourceTypes = new SourceTypes();
-    components = new Components();
-    themes = new Themes();
     tabInfoRegistry = new TabInfoRegistry();
-    loader = new PluginLoader(dataTypes, sourceTypes, components, themes, tabInfoRegistry, new Converters());
+    themes = new Themes();
+    Converters converters = new Converters();
+    var context = new ShuffleboardContext(components, converters, dataTypes, sourceTypes, themes, tabInfoRegistry);
+    loader = new PluginLoader(context);
   }
 
   @Test

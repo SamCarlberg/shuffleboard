@@ -1,6 +1,5 @@
-package edu.wpi.first.shuffleboard.app.tab;
+package edu.wpi.first.shuffleboard.api.tab;
 
-import edu.wpi.first.shuffleboard.api.tab.TabInfo;
 import edu.wpi.first.shuffleboard.api.util.Registry;
 
 import java.util.Objects;
