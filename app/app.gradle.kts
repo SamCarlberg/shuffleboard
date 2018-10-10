@@ -1,5 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.internal.jvm.Jvm
 import org.gradle.jvm.tasks.Jar
+import shadow.org.apache.commons.io.output.ByteArrayOutputStream
+import java.nio.charset.Charset.defaultCharset
 
 plugins {
     application
@@ -59,6 +62,8 @@ tasks.withType<Test> {
 
 val nativeShadowTasks = NativePlatforms.values().map { platform ->
     tasks.create<ShadowJar>("shadowJar-${platform.platformName}") {
+        group = "Shadow"
+        description = "Creates a platform=specific shadow jar for ${platform.platformName}"
         classifier = platform.platformName
         configurations = listOf(
                 project.configurations.compile,
@@ -76,9 +81,78 @@ val nativeShadowTasks = NativePlatforms.values().map { platform ->
 }
 
 tasks.create("shadowJarAllPlatforms") {
+    group = "Shadow"
+    description = "Creates all platform-specific shadow jars at once"
     nativeShadowTasks.forEach {
         this.dependsOn(it)
     }
+}
+
+tasks.register("jlink") {
+    group = "Distribution"
+    description = """
+        Creates a minimal Java runtime image with everything needed to run the application.
+    """.trimIndent()
+    val shadowTask = nativeShadowTasks.find { it.name.contains(currentPlatform.platformName) }!!
+    dependsOn(shadowTask)
+    doLast {
+        delete("build/jlink") // jlink fails if the output directory already exists
+
+        val shadowJarLocation = shadowTask.outputs.files.singleFile.absolutePath
+        val javaBin = Jvm.current().javaHome.resolve("bin")
+        val deps: List<String> = ByteArrayOutputStream().use { os ->
+            // Get the standard library modules used by Shuffleboard and its dependencies
+            exec {
+                commandLine = listOf(javaBin.resolve("jdeps").toString(), "--list-deps", shadowJarLocation)
+                standardOutput = os
+            }
+            val out = os.toString(defaultCharset())
+            out.split("\n")
+                    .filter { it.startsWith("   ") }
+                    .filter { !it.contains('/') }
+                    .filter { it == it.toLowerCase() }
+                    .map { it.substring(3) }
+        }
+        exec {
+            commandLine = listOf(
+                    javaBin.resolve("jlink").toString(),
+                    "--no-header-files",
+                    "--no-man-pages",
+                    "--compress=2",
+                    "--strip-debug",
+                    "--add-modules", deps.joinToString(separator = ","),
+                    "--output", "build/jlink")
+        }
+
+        // Copy the platform release JAR next to the jlink 'java' executable
+        copy {
+            from(shadowJarLocation)
+            rename {
+                "shuffleboard.jar"
+            }
+            into("build/jlink/bin")
+        }
+
+        copy {
+            if (currentPlatform == NativePlatforms.WIN32 || currentPlatform == NativePlatforms.WIN64) {
+                from("jlinkScripts/shuffleboard.bat")
+            } else {
+                from("jlinkScripts/shuffleboard.sh")
+            }
+            into("build/jlink")
+        }
+    }
+}
+
+tasks.register("jlinkZip", Zip::class.java) {
+    group = "Distribution"
+    description = """
+        Creates a distributable zip file of a minimal runtime image to run the application.
+    """.trimIndent()
+    dependsOn("jlink")
+    archiveName = "shuffleboard-${project.version}-${currentPlatform.platformName}"
+    from("build/jlink")
+    into(archiveName)
 }
 
 tasks.withType<ShadowJar>().configureEach {
