@@ -6,6 +6,9 @@ import edu.wpi.first.shuffleboard.api.sources.recording.TimestampedData;
 import edu.wpi.first.shuffleboard.api.util.PropertyUtils;
 import edu.wpi.first.shuffleboard.api.util.Registry;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.fxmisc.easybind.EasyBind;
 
 import java.util.HashMap;
@@ -17,10 +20,11 @@ import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+@Singleton
 public final class SourceTypes extends Registry<SourceType> {
 
-  // TODO replace with DI eg Guice
-  private static SourceTypes defaultInstance = null;
+  @Inject
+  private static SourceTypes defaultInstance;
 
   private final Map<String, SourceType> types = new HashMap<>();
   private final ObservableList<String> typeNames = FXCollections.observableArrayList();
@@ -33,11 +37,6 @@ public final class SourceTypes extends Registry<SourceType> {
    * Gets the default source type registry.
    */
   public static SourceTypes getDefault() {
-    synchronized (SourceTypes.class) {
-      if (defaultInstance == null) {
-        defaultInstance = new SourceTypes();
-      }
-    }
     return defaultInstance;
   }
 

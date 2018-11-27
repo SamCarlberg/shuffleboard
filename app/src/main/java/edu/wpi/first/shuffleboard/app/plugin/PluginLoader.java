@@ -20,6 +20,9 @@ import edu.wpi.first.shuffleboard.app.tab.TabInfoRegistry;
 import com.github.zafarkhaja.semver.Version;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
+import com.google.inject.Inject;
+import com.google.inject.ProvisionException;
+import com.google.inject.Singleton;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,22 +50,18 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 
+@Singleton
 public class PluginLoader {
 
   private static final Logger log = Logger.getLogger(PluginLoader.class.getName());
 
-  private static final PluginLoader defaultLoader =
-      new PluginLoader(
-          DataTypes.getDefault(),
-          SourceTypes.getDefault(),
-          Components.getDefault(),
-          Themes.getDefault(),
-          TabInfoRegistry.getDefault(),
-          Converters.getDefault());
+  @Inject
+  private static PluginLoader defaultLoader;
 
   private final ObservableSet<Plugin> loadedPlugins = FXCollections.observableSet(new LinkedHashSet<>());
   private final Set<Class<? extends Plugin>> knownPluginClasses = new HashSet<>();
   private final ObservableList<Plugin> knownPlugins = FXCollections.observableArrayList();
+  private final PluginFactory pluginFactory;
   private final DataTypes dataTypes;
   private final SourceTypes sourceTypes;
   private final Components components;
@@ -83,12 +82,15 @@ public class PluginLoader {
    *
    * @throws NullPointerException if any of the parameters is {@code null}
    */
-  public PluginLoader(DataTypes dataTypes,
+  @Inject
+  public PluginLoader(PluginFactory pluginFactory,
+                      DataTypes dataTypes,
                       SourceTypes sourceTypes,
                       Components components,
                       Themes themes,
                       TabInfoRegistry tabInfoRegistry,
                       Converters converters) {
+    this.pluginFactory = Objects.requireNonNull(pluginFactory, "pluginFactory");
     this.dataTypes = Objects.requireNonNull(dataTypes, "dataTypes");
     this.sourceTypes = Objects.requireNonNull(sourceTypes, "sourceTypes");
     this.components = Objects.requireNonNull(components, "components");
@@ -216,13 +218,11 @@ public class PluginLoader {
     if (Plugin.class.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
       try {
         Plugin.validatePluginClass(clazz);
-        if (Modifier.isPublic(clazz.getConstructor().getModifiers())) {
-          Plugin plugin = clazz.newInstance();
-          load(plugin);
-          return true;
-        }
-      } catch (ReflectiveOperationException | InvalidPluginDefinitionException e) {
-        log.log(Level.WARNING, "Could not load plugin class", e);
+        Plugin plugin = pluginFactory.create(clazz);
+        load(plugin);
+        return true;
+      } catch (InvalidPluginDefinitionException | ProvisionException e) {
+        log.log(Level.WARNING, "Could not load plugin class " + clazz.getName(), e);
         return false;
       }
     }

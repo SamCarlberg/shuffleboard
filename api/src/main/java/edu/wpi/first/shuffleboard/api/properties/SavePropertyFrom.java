@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  *     speedSlider.maxProperty().bindBidirectional(maxSpeed);
  *   }
  *
- *  @literal @Override
+ *   @Override
  *   public List<Property> getProperties() {
  *     return ImmutableList.of(
  *       speed,
@@ -54,9 +54,9 @@ import java.lang.annotation.Target;
  * <pre>{@code
  * class MyWidget implements Widget {
  *
- *  @literal @SavePropertyFrom(propertyName = "value", savedName = "speed")
- *  @literal @SavePropertyFrom(propertyName = "min", savedName = "minSpeed")
- *  @literal @SavePropertyFrom(propertyName = "max", savedName = "maxSpeed")
+ *   @SavePropertyFrom(propertyName = "value", savedName = "speed")
+ *   @SavePropertyFrom(propertyName = "min", savedName = "minSpeed")
+ *   @SavePropertyFrom(propertyName = "max", savedName = "maxSpeed")
  *   private final Slider speedSlider = new Slider();
  *
  * }

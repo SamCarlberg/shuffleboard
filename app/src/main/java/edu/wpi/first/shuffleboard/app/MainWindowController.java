@@ -21,6 +21,8 @@ import edu.wpi.first.shuffleboard.app.prefs.SettingsDialog;
 import edu.wpi.first.shuffleboard.app.sources.recording.Playback;
 import edu.wpi.first.shuffleboard.app.tab.TabInfoRegistry;
 
+import com.google.inject.Inject;
+
 import org.fxmisc.easybind.EasyBind;
 
 import java.io.File;
@@ -47,6 +49,7 @@ import javafx.stage.Window;
 public class MainWindowController {
 
   private static final Logger log = Logger.getLogger(MainWindowController.class.getName());
+  private final StageProvider stageProvider;
 
   @FXML
   private MenuItem recordingMenu;
@@ -59,15 +62,28 @@ public class MainWindowController {
   @FXML
   private DashboardTabPane dashboard;
 
-  private final PluginDialog pluginDialog = new PluginDialog();
-  private final AboutDialog aboutDialog = new AboutDialog();
-  private final ExportRecordingDialog exportRecordingDialog = new ExportRecordingDialog();
-  private final PrefsDialog prefsDialog = new PrefsDialog();
+  private final PluginDialog pluginDialog;
+  private final AboutDialog aboutDialog;
+  private final ExportRecordingDialog exportRecordingDialog;
+  private final PrefsDialog prefsDialog;
 
   private final SaveFileHandler saveFileHandler = new SaveFileHandler();
 
   private final ObservableValue<List<String>> stylesheets
       = EasyBind.map(AppPreferences.getInstance().themeProperty(), Theme::getStyleSheets);
+
+  @Inject
+  MainWindowController(StageProvider stageProvider,
+                       PluginDialog pluginDialog,
+                       AboutDialog aboutDialog,
+                       ExportRecordingDialog exportRecordingDialog,
+                       PrefsDialog prefsDialog) {
+    this.stageProvider = stageProvider;
+    this.pluginDialog = pluginDialog;
+    this.aboutDialog = aboutDialog;
+    this.exportRecordingDialog = exportRecordingDialog;
+    this.prefsDialog = prefsDialog;
+  }
 
   @FXML
   private void initialize() {
@@ -270,7 +286,7 @@ public class MainWindowController {
     chooser.setInitialDirectory(Storage.getRecordingDir());
     chooser.getExtensionFilters().setAll(
         new FileChooser.ExtensionFilter("Shuffleboard Data Recording", "*.sbr"));
-    final File selected = chooser.showOpenDialog(root.getScene().getWindow());
+    final File selected = chooser.showOpenDialog(stageProvider.getPrimaryStage());
     if (selected == null) {
       return;
     }
@@ -296,6 +312,7 @@ public class MainWindowController {
         .collect(Collectors.toList());
     SettingsDialog dialog = new SettingsDialog(categories);
     dialog.getDialogPane().getStylesheets().setAll(stylesheets.getValue());
+    dialog.initOwner(stageProvider.getPrimaryStage());
     dialog.setTitle("Tab Preferences");
     dialog.showAndWait();
   }

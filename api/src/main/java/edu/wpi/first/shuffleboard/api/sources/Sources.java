@@ -2,6 +2,8 @@ package edu.wpi.first.shuffleboard.api.sources;
 
 import edu.wpi.first.shuffleboard.api.util.Registry;
 
+import com.google.inject.Inject;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +18,8 @@ import java.util.stream.Stream;
  */
 public class Sources extends Registry<DataSource> {
 
-  // TODO replace with DI eg Guice
-  private static final Sources defaultInstance = new Sources();
+  @Inject
+  private static Sources defaultInstance;
 
   private final Map<String, DataSource> sources = new HashMap<>();
 

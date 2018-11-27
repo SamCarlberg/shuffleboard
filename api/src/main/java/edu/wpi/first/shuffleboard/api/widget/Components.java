@@ -11,6 +11,7 @@ import edu.wpi.first.shuffleboard.api.util.TypeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -37,8 +38,8 @@ import static java.util.Objects.requireNonNull;
 public class Components extends Registry<ComponentType> {
   protected static final Logger logger = Logger.getLogger(Components.class.getName());
 
-  // TODO replace with DI eg Guice
-  private static Components defaultInstance = new Components();
+  @Inject
+  private static Components defaultInstance;
 
   private final Map<String, ComponentType<?>> components = new TreeMap<>();
   private final Map<DataType, ComponentType<?>> defaultComponents = new HashMap<>();

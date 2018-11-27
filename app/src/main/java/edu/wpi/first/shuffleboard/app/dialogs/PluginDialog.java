@@ -1,9 +1,15 @@
 package edu.wpi.first.shuffleboard.app.dialogs;
 
+import edu.wpi.first.shuffleboard.api.theme.Theme;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
 import edu.wpi.first.shuffleboard.api.util.LazyInit;
 import edu.wpi.first.shuffleboard.app.PluginPaneController;
+import edu.wpi.first.shuffleboard.app.StageProvider;
 import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
+
+import com.google.inject.Inject;
+
+import org.fxmisc.easybind.EasyBind;
 
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -17,11 +23,20 @@ import javafx.stage.Stage;
  */
 public final class PluginDialog {
 
+  private final AppPreferences appPreferences;
+  private final StageProvider stageProvider;
+
   private boolean initialized = false;
 
   // Lazy init to avoid unnecessary loading if the dialog is never used
   private final LazyInit<Pane> pane = LazyInit.of(() -> FxUtils.load(PluginPaneController.class));
   private Stage stage;
+
+  @Inject
+  public PluginDialog(AppPreferences appPreferences, StageProvider stageProvider) {
+    this.appPreferences = appPreferences;
+    this.stageProvider = stageProvider;
+  }
 
   private void setup() {
     initialized = true;
@@ -37,7 +52,8 @@ public final class PluginDialog {
     stage.setMinWidth(675);
     stage.setMinHeight(325);
     stage.setTitle("Loaded Plugins");
-    pane.get().getStylesheets().setAll(AppPreferences.getInstance().getTheme().getStyleSheets());
+    stage.initOwner(stageProvider.getPrimaryStage());
+    FxUtils.bind(stage.getScene().getStylesheets(), EasyBind.map(appPreferences.themeProperty(), Theme::getStyleSheets));
   }
 
   /**

@@ -1,11 +1,14 @@
 package edu.wpi.first.shuffleboard.app;
 
+import edu.wpi.first.shuffleboard.api.HostServicesProvider;
+import edu.wpi.first.shuffleboard.api.ShuffleboardApiModule;
 import edu.wpi.first.shuffleboard.api.sources.recording.Converters;
 import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.util.ShutdownHooks;
 import edu.wpi.first.shuffleboard.api.util.Storage;
 import edu.wpi.first.shuffleboard.api.util.Time;
 import edu.wpi.first.shuffleboard.app.plugin.PluginCache;
+import edu.wpi.first.shuffleboard.app.plugin.PluginFactory;
 import edu.wpi.first.shuffleboard.app.plugin.PluginLoader;
 import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
 import edu.wpi.first.shuffleboard.app.sources.recording.CsvConverter;
@@ -15,6 +18,11 @@ import edu.wpi.first.shuffleboard.plugin.networktables.NetworkTablesPlugin;
 import edu.wpi.first.shuffleboard.plugin.powerup.PowerUpPlugin;
 
 import com.google.common.base.Stopwatch;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.name.Names;
 
 import it.sauronsoftware.junique.AlreadyLockedException;
 import it.sauronsoftware.junique.JUnique;
@@ -38,7 +46,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 @SuppressWarnings("PMD.MoreThanOneLogger") // there's only one logger used, the others are for setting up file logging
-public class Shuffleboard extends Application {
+public class Shuffleboard extends Application implements HostServicesProvider {
 
   private static final Logger logger = Logger.getLogger(Shuffleboard.class.getName());
 
@@ -47,6 +55,19 @@ public class Shuffleboard extends Application {
 
   private final Stopwatch startupTimer = Stopwatch.createStarted();
   private MainWindowController mainWindowController;
+
+  private Injector injector;
+  @Inject
+  private Themes themes;
+  @Inject
+  private Converters converters;
+  @Inject
+  private PluginLoader pluginLoader;
+  @Inject
+  private PluginCache pluginCache;
+  @Inject
+  private AppPreferences appPreferences;
+  private Stage primaryStage;
 
   @Override
   public void init() throws AlreadyLockedException, IOException, InterruptedException {
@@ -62,37 +83,46 @@ public class Shuffleboard extends Application {
 
     Loggers.setupLoggers();
 
+    var appModule = new AbstractModule() {
+      @Override
+      protected void configure() {
+        // This CANNOT be a method reference since the injector field will not be set when this is called
+        bind(PluginFactory.class).toInstance(type -> injector.getInstance(type));
+
+        bind(HostServicesProvider.class).toInstance(Shuffleboard.this);
+        bind(StageProvider.class).toInstance(() -> primaryStage);
+      }
+    };
+    injector = Guice.createInjector(new ShuffleboardApiModule(), new ShuffleboardAppModule(), appModule);
+    injector.injectMembers(this);
+
     // Search for and load themes from the custom theme directory before loading application preferences
     // This avoids an issue with attempting to load a theme at startup that hasn't yet been registered
     logger.finer("Registering custom user themes from external dir");
     notifyPreloader(new ShuffleboardPreloader.StateNotification("Loading custom themes", 0));
-    Themes.getDefault().loadThemesFromDir();
+    themes.loadThemesFromDir();
 
     logger.info("Build time: " + getBuildTime());
 
-    // Before we load components that only work with Java 8, check to make sure
-    // the application is running on Java 8. If we are running on an invalid
-    // version, show an alert and exit before we get into trouble.
-
-    Converters.getDefault().register(CsvConverter.Instance);
+    converters.register(CsvConverter.Instance);
 
     notifyPreloader(new ShuffleboardPreloader.StateNotification("Loading base plugin", 0.125));
-    PluginLoader.getDefault().load(new BasePlugin());
+    pluginLoader.load(new BasePlugin());
 
     notifyPreloader(new ShuffleboardPreloader.StateNotification("Loading NetworkTables plugin", 0.25));
-    PluginLoader.getDefault().load(new NetworkTablesPlugin());
+    pluginLoader.load(injector.getInstance(NetworkTablesPlugin.class));
     notifyPreloader(new ShuffleboardPreloader.StateNotification("Loading CameraServer plugin", 0.375));
-    PluginLoader.getDefault().load(new CameraServerPlugin());
+    pluginLoader.load(new CameraServerPlugin());
     notifyPreloader(new ShuffleboardPreloader.StateNotification("Loading Powerup plugin", 0.5));
-    PluginLoader.getDefault().load(new PowerUpPlugin());
+    pluginLoader.load(new PowerUpPlugin());
     notifyPreloader(new ShuffleboardPreloader.StateNotification("Loading custom plugins", 0.625));
-    PluginLoader.getDefault().loadAllJarsFromDir(Storage.getPluginPath());
+    pluginLoader.loadAllJarsFromDir(Storage.getPluginPath());
     notifyPreloader(new ShuffleboardPreloader.StateNotification("Loading custom plugins", 0.75));
-    PluginCache.getDefault().loadCache(PluginLoader.getDefault());
+    pluginCache.loadCache(pluginLoader);
     Stopwatch fxmlLoadTimer = Stopwatch.createStarted();
 
     notifyPreloader(new ShuffleboardPreloader.StateNotification("Initializing user interface", 0.875));
-    FXMLLoader loader = new FXMLLoader(MainWindowController.class.getResource("MainWindow.fxml"));
+    FXMLLoader loader = new FXMLLoader(MainWindowController.class.getResource("MainWindow.fxml"), null, null, injector::getInstance);
     mainPane = loader.load();
     long fxmlLoadTime = fxmlLoadTimer.elapsed(TimeUnit.MILLISECONDS);
     mainWindowController = loader.getController();
@@ -104,6 +134,7 @@ public class Shuffleboard extends Application {
 
   @Override
   public void start(Stage primaryStage) {
+    this.primaryStage = primaryStage;
     // Set up the application thread to log exceptions instead of using printStackTrace()
     // Must be called in start() because init() is run on the main thread, not the FX application thread
     Thread.currentThread().setUncaughtExceptionHandler(Shuffleboard::uncaughtException);
@@ -113,8 +144,8 @@ public class Shuffleboard extends Application {
 
     // Setup the dashboard tabs after all plugins are loaded
     Platform.runLater(() -> {
-      File lastSaveFile = AppPreferences.getInstance().getSaveFile();
-      if (AppPreferences.getInstance().isAutoLoadLastSaveFile() && lastSaveFile != null && lastSaveFile.exists()) {
+      File lastSaveFile = appPreferences.getSaveFile();
+      if (appPreferences.isAutoLoadLastSaveFile() && lastSaveFile != null && lastSaveFile.exists()) {
         try {
           mainWindowController.load(lastSaveFile);
         } catch (RuntimeException | IOException e) {
@@ -132,7 +163,7 @@ public class Shuffleboard extends Application {
     primaryStage.setWidth(Screen.getPrimary().getVisualBounds().getWidth());
     primaryStage.setHeight(Screen.getPrimary().getVisualBounds().getHeight());
     primaryStage.setOnCloseRequest(closeEvent -> {
-      if (!AppPreferences.getInstance().isConfirmExit()) {
+      if (!appPreferences.isConfirmExit()) {
         // Don't show the confirmation dialog, just exit
         return;
       }

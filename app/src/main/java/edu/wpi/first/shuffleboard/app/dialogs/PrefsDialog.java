@@ -7,6 +7,7 @@ import edu.wpi.first.shuffleboard.api.prefs.Setting;
 import edu.wpi.first.shuffleboard.api.theme.Theme;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
 import edu.wpi.first.shuffleboard.api.util.TypeUtils;
+import edu.wpi.first.shuffleboard.app.StageProvider;
 import edu.wpi.first.shuffleboard.app.components.DashboardTab;
 import edu.wpi.first.shuffleboard.app.components.DashboardTabPane;
 import edu.wpi.first.shuffleboard.app.plugin.PluginLoader;
@@ -14,6 +15,7 @@ import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
 import edu.wpi.first.shuffleboard.app.prefs.SettingsDialog;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 
 import org.fxmisc.easybind.EasyBind;
 
@@ -31,8 +33,19 @@ public final class PrefsDialog {
 
   private static final String DIALOG_TITLE = "Shuffleboard Preferences";
 
-  private final ObservableValue<List<String>> stylesheets
-      = EasyBind.map(AppPreferences.getInstance().themeProperty(), Theme::getStyleSheets);
+  private final AppPreferences appPreferences;
+  private final StageProvider stageProvider;
+
+  private final ObservableValue<List<String>> stylesheets;
+  private final PluginLoader pluginLoader;
+
+  @Inject
+  public PrefsDialog(AppPreferences appPreferences, StageProvider stageProvider, PluginLoader pluginLoader) {
+    this.appPreferences = appPreferences;
+    this.stageProvider = stageProvider;
+    this.pluginLoader = pluginLoader;
+    stylesheets = EasyBind.map(appPreferences.themeProperty(), Theme::getStyleSheets);
+  }
 
   /**
    * Shows the preferences dialog.
@@ -44,14 +57,14 @@ public final class PrefsDialog {
 
   private SettingsDialog createDialog(DashboardTabPane tabPane) {
     List<Category> pluginCategories = new ArrayList<>();
-    for (Plugin plugin : PluginLoader.getDefault().getLoadedPlugins()) {
+    for (Plugin plugin : pluginLoader.getLoadedPlugins()) {
       if (plugin.getSettings().isEmpty()) {
         continue;
       }
       Category category = Category.of(plugin.getName(), plugin.getSettings());
       pluginCategories.add(category);
     }
-    Category appSettings = AppPreferences.getInstance().getSettings();
+    Category appSettings = appPreferences.getSettings();
     Category plugins = Category.of("Plugins", pluginCategories, ImmutableList.of());
     Category tabs = Category.of("Tabs",
         tabPane.getTabs().stream()
@@ -60,13 +73,14 @@ public final class PrefsDialog {
             .collect(Collectors.toList()),
         ImmutableList.of(
             Group.of("Default Settings",
-                Setting.of("Default tile size", AppPreferences.getInstance().defaultTileSizeProperty())
+                Setting.of("Default tile size", appPreferences.defaultTileSizeProperty())
             )
         ));
 
     SettingsDialog dialog = new SettingsDialog(appSettings, plugins, tabs);
     FxUtils.bind(dialog.getDialogPane().getStylesheets(), stylesheets);
     dialog.setTitle(DIALOG_TITLE);
+    dialog.initOwner(stageProvider.getPrimaryStage());
     return dialog;
   }
 

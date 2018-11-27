@@ -3,6 +3,7 @@ package edu.wpi.first.shuffleboard.api.sources.recording;
 import edu.wpi.first.shuffleboard.api.util.Registry;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -11,7 +12,8 @@ public final class Converters extends Registry<Converter> {
 
   private final Map<String, Converter> converters = new TreeMap<>();
 
-  private static final Converters defaultInstance = new Converters();
+  @Inject
+  private static Converters defaultInstance;
 
   public static Converters getDefault() {
     return defaultInstance;

@@ -4,6 +4,8 @@ import edu.wpi.first.shuffleboard.api.util.Registry;
 import edu.wpi.first.shuffleboard.api.util.Storage;
 import edu.wpi.first.shuffleboard.api.util.TypeUtils;
 
+import com.google.inject.Inject;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -23,7 +25,7 @@ public final class Themes extends Registry<Theme> {
 
   private static final Logger log = Logger.getLogger(Themes.class.getName());
 
-  // TODO replace with DI eg Guice
+  @Inject
   private static Themes defaultInstance;
 
   public static final Theme MATERIAL_LIGHT = new Theme("Material Light", "/edu/wpi/first/shuffleboard/app/light.css");
@@ -33,14 +35,16 @@ public final class Themes extends Registry<Theme> {
   public static final Theme INITIAL_THEME = MATERIAL_LIGHT;
 
   /**
+   * Creates a new themes registry with the built-in themes registered.
+   */
+  public static Themes createDefault() {
+    return new Themes(MATERIAL_LIGHT, MATERIAL_DARK, MIDNIGHT);
+  }
+
+  /**
    * Gets the default themes instance.
    */
   public static Themes getDefault() {
-    synchronized (Themes.class) {
-      if (defaultInstance == null) {
-        defaultInstance = new Themes(MATERIAL_LIGHT, MATERIAL_DARK, MIDNIGHT);
-      }
-    }
     return defaultInstance;
   }
 

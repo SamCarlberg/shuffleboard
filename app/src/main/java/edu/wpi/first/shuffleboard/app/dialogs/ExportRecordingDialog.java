@@ -1,9 +1,15 @@
 package edu.wpi.first.shuffleboard.app.dialogs;
 
+import edu.wpi.first.shuffleboard.api.theme.Theme;
 import edu.wpi.first.shuffleboard.api.util.FxUtils;
 import edu.wpi.first.shuffleboard.api.util.LazyInit;
 import edu.wpi.first.shuffleboard.app.ConvertRecordingPaneController;
+import edu.wpi.first.shuffleboard.app.StageProvider;
 import edu.wpi.first.shuffleboard.app.prefs.AppPreferences;
+
+import com.google.inject.Inject;
+
+import org.fxmisc.easybind.EasyBind;
 
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
@@ -15,17 +21,27 @@ import javafx.stage.Stage;
  */
 public final class ExportRecordingDialog {
 
+  private final AppPreferences appPreferences;
+  private final StageProvider stageProvider;
+
   private boolean initialized = false;
   private final LazyInit<Pane> pane = LazyInit.of(() -> FxUtils.load(ConvertRecordingPaneController.class));
   private Stage stage;
+
+  @Inject
+  public ExportRecordingDialog(AppPreferences appPreferences, StageProvider stageProvider) {
+    this.appPreferences = appPreferences;
+    this.stageProvider = stageProvider;
+  }
 
   private void setup() {
     stage = new Stage();
     stage.setTitle("Export Recording Files");
     stage.setScene(new Scene(pane.get()));
     stage.setResizable(false);
-    pane.get().getStylesheets().setAll(AppPreferences.getInstance().getTheme().getStyleSheets());
+    FxUtils.bind(stage.getScene().getStylesheets(), EasyBind.map(appPreferences.themeProperty(), Theme::getStyleSheets));
     stage.initModality(Modality.APPLICATION_MODAL);
+    stage.initOwner(stageProvider.getPrimaryStage());
     initialized = true;
   }
 

@@ -1,9 +1,8 @@
 package edu.wpi.first.shuffleboard.app.plugin;
 
-import edu.wpi.first.shuffleboard.api.util.Storage;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.net.URI;
@@ -26,31 +25,17 @@ public class PluginCache {
   private static final Gson cacheGson = new Gson();
   private final Path cacheFile;
 
-  private static volatile PluginCache defaultInstance;
-  private static final PluginCache nullCache = new PluginCache(null);
+  @Inject
+  private static PluginCache defaultInstance;
 
   public PluginCache(Path cacheFile) {
     this.cacheFile = cacheFile;
   }
 
   /**
-   * Gets the default plugin cache instance. If it does not exist, an attempt will be made to create it before returning
-   * it. If this attempt fails, a "dummy" object will be returned instead whose save and load functions will not do
-   * anything.
+   * Gets the default plugin cache instance.
    */
   public static PluginCache getDefault() {
-    if (defaultInstance == null) { // NOPMD not thread safe -- it absolutely is
-      synchronized (PluginCache.class) {
-        if (defaultInstance == null) {
-          try {
-            defaultInstance = new PluginCache(Storage.getPluginCache());
-          } catch (IOException e) {
-            log.log(Level.WARNING, "Could not create default plugin cache", e);
-            return nullCache;
-          }
-        }
-      }
-    }
     return defaultInstance;
   }
 

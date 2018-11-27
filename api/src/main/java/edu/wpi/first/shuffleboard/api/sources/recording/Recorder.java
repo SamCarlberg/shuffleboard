@@ -14,6 +14,8 @@ import edu.wpi.first.shuffleboard.api.util.Storage;
 import edu.wpi.first.shuffleboard.api.util.ThreadUtils;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,12 +34,15 @@ import javafx.beans.property.StringProperty;
  * Records data from sources. Each source is responsible for calling {@link #recordCurrentValue} whenever its value
  * changes.
  */
+@Singleton
 public final class Recorder {
 
   private static final Logger log = Logger.getLogger(Recorder.class.getName());
 
   public static final String DEFAULT_RECORDING_FILE_NAME_FORMAT = "recording-${time}";
-  private static final Recorder instance = new Recorder();
+
+  @Inject
+  private static Recorder instance;
 
   private final BooleanProperty running = new AtomicBooleanProperty(this, "running", false);
   private final StringProperty fileNameFormat =
@@ -88,7 +93,7 @@ public final class Recorder {
     ShutdownHooks.addHook(this::stop);
   }
 
-  private Recorder() {
+  public Recorder() {
     this(true);
   }
 
@@ -115,7 +120,9 @@ public final class Recorder {
 
   /**
    * Gets the recorder instance.
+   * @deprecated prefer injection
    */
+  @Deprecated(since = "2019")
   public static Recorder getInstance() {
     return instance;
   }

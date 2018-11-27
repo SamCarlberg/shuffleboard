@@ -15,12 +15,12 @@ import java.lang.annotation.Target;
  *
  * <p>For example, this will save a property named {@code foo} with the name of the property ("foo"):
  * <pre>{@code
- *@literal @SaveThisProperty
+ * @SaveThisProperty
  * private final Property<Foo> foo = new SimpleObjectProperty(this, "foo", new Foo());
  * }</pre>
  * This will save it as "a foo":
  * <pre>{@code
- *@literal @SaveThisProperty(name = "a foo")
+ * @SaveThisProperty(name = "a foo")
  * private final Property<Foo> foo = new SimpleObjectProperty(this, "foo", new Foo());
  * }</pre>
  *
@@ -28,12 +28,12 @@ import java.lang.annotation.Target;
  * set the name. Otherwise, an exception will be thrown when attempting to save or load the widget.
  * <pre>{@code
  * // No name set!
- *@literal @SaveThisProperty
+ * @SaveThisProperty
  * private final Property<Foo> foo = new SimpleObjectProperty(this, "", new Foo());
  * }</pre>
  * <pre>{@code
  * // Good - the name is set in the annotation
- *@literal @SaveThisProperty(name = "a foo")
+ * @SaveThisProperty(name = "a foo")
  * private final Property<Foo> foo = new SimpleObjectProperty(this, "", new Foo());
  * }</pre>
  *

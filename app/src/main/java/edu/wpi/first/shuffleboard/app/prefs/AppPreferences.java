@@ -8,6 +8,8 @@ import edu.wpi.first.shuffleboard.api.theme.Themes;
 import edu.wpi.first.shuffleboard.api.util.PreferencesUtils;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import java.io.File;
 import java.util.prefs.Preferences;
@@ -22,6 +24,7 @@ import javafx.beans.property.SimpleObjectProperty;
 /**
  * Contains the user preferences for the app. These preferences are user-specific and are not contained in save files.
  */
+@Singleton
 public final class AppPreferences {
 
   private final Property<Theme> theme = new SimpleObjectProperty<>(this, "Theme", Themes.INITIAL_THEME);
@@ -50,15 +53,16 @@ public final class AppPreferences {
       )
   );
 
-  @VisibleForTesting
-  static AppPreferences instance = new AppPreferences();
+  @Inject
+  private static AppPreferences instance;
 
   /**
    * Creates a new app preferences instance.
    */
-  public AppPreferences() {
+  @Inject
+  public AppPreferences(Themes themes) {
     Preferences preferences = Preferences.userNodeForPackage(getClass());
-    PreferencesUtils.read(theme, preferences, Themes.getDefault()::forName);
+    PreferencesUtils.read(theme, preferences, themes::forName);
     PreferencesUtils.read(defaultTileSize, preferences);
     PreferencesUtils.read(confirmTabClose, preferences);
     PreferencesUtils.read(saveFile, preferences, File::new);

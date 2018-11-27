@@ -19,6 +19,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Primitives;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,10 +39,11 @@ import static java.util.Objects.requireNonNull;
  * Registry of data types in shuffleboard. This class also provides data types for various "wildcard" types, as well as
  * types for primitive and arrays of primitive data. These types are always registered and may not be unregistered.
  */
+@Singleton
 public class DataTypes extends Registry<DataType> {
 
-  // TODO replace with DI eg Guice
-  private static DataTypes defaultInstance = null;
+  @Inject
+  private static DataTypes defaultInstance;
 
   // Catchall or wildcard types
   /**
@@ -126,11 +129,6 @@ public class DataTypes extends Registry<DataType> {
    * Gets the default data type registry.
    */
   public static DataTypes getDefault() {
-    synchronized (DataTypes.class) {
-      if (defaultInstance == null) {
-        defaultInstance = new DataTypes();
-      }
-    }
     return defaultInstance;
   }
 

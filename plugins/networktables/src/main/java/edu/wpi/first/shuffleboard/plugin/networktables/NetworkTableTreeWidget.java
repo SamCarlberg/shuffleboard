@@ -24,8 +24,8 @@ public class NetworkTableTreeWidget extends SimpleAnnotatedWidget<MapData> {
   private final SourceTreeTable<NetworkTableSourceEntry, String> tree = new SourceTreeTable<>();
 
   @SuppressWarnings("JavadocMethod")
-  public NetworkTableTreeWidget() {
-    tree.setSourceType(NetworkTableSourceType.getInstance());
+  public NetworkTableTreeWidget(NetworkTableSourceType sourceType) {
+    tree.setSourceType(sourceType);
     pane.getChildren().add(tree);
     NetworkTableSourceEntry rootEntry = new NetworkTableSourceEntry("/", null);
     TreeItem<NetworkTableSourceEntry> root = new FilterableTreeItem<>(rootEntry);
