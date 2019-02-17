@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import edu.wpi.first.shuffleboard.plugin.base.components.Piston?>
+<?import org.controlsfx.glyphfont.Glyph?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.util.Duration?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.wpi.first.shuffleboard.plugin.base.widget.SolenoidWidget"
+      fx:id="root"
+      minWidth="128" minHeight="64"
+      prefWidth="128" prefHeight="64"
+      spacing="16">
+    <padding>
+        <Insets topRightBottomLeft="4"/>
+    </padding>
+    <Piston fx:id="piston">
+        <animationDuration>
+            <Duration millis="150"/>
+        </animationDuration>
+    </Piston>
+    <HBox>
+        <Label fx:id="powerLabel">
+            <graphic>
+                <Glyph fontFamily="FontAwesome" icon="BOLT" fx:id="powerIcon"/>
+            </graphic>
+        </Label>
+    </HBox>
+</VBox>

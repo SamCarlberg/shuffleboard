@@ -10,6 +10,7 @@ import edu.wpi.first.shuffleboard.api.tab.TabInfo;
 import edu.wpi.first.shuffleboard.api.widget.ComponentType;
 import edu.wpi.first.shuffleboard.api.widget.LayoutClass;
 import edu.wpi.first.shuffleboard.api.widget.WidgetType;
+import edu.wpi.first.shuffleboard.plugin.base.components.Piston;
 import edu.wpi.first.shuffleboard.plugin.base.data.types.AccelerometerType;
 import edu.wpi.first.shuffleboard.plugin.base.data.types.AnalogInputType;
 import edu.wpi.first.shuffleboard.plugin.base.data.types.BasicSubsystemType;
@@ -26,6 +27,7 @@ import edu.wpi.first.shuffleboard.plugin.base.data.types.QuadratureEncoderType;
 import edu.wpi.first.shuffleboard.plugin.base.data.types.RelayType;
 import edu.wpi.first.shuffleboard.plugin.base.data.types.RobotPreferencesType;
 import edu.wpi.first.shuffleboard.plugin.base.data.types.SendableChooserType;
+import edu.wpi.first.shuffleboard.plugin.base.data.types.SolenoidType;
 import edu.wpi.first.shuffleboard.plugin.base.data.types.SpeedControllerType;
 import edu.wpi.first.shuffleboard.plugin.base.data.types.SubsystemType;
 import edu.wpi.first.shuffleboard.plugin.base.data.types.ThreeAxisAccelerometerType;
@@ -53,6 +55,7 @@ import edu.wpi.first.shuffleboard.plugin.base.widget.PowerDistributionPanelWidge
 import edu.wpi.first.shuffleboard.plugin.base.widget.RelayWidget;
 import edu.wpi.first.shuffleboard.plugin.base.widget.RobotPreferencesWidget;
 import edu.wpi.first.shuffleboard.plugin.base.widget.SimpleDialWidget;
+import edu.wpi.first.shuffleboard.plugin.base.widget.SolenoidWidget;
 import edu.wpi.first.shuffleboard.plugin.base.widget.SpeedControllerWidget;
 import edu.wpi.first.shuffleboard.plugin.base.widget.SplitButtonChooserWidget;
 import edu.wpi.first.shuffleboard.plugin.base.widget.TextViewWidget;
@@ -73,7 +76,7 @@ import java.util.Set;
 @Description(
     group = "edu.wpi.first.shuffleboard",
     name = "Base",
-    version = "1.1.4",
+    version = "1.1.5",
     summary = "Defines all the WPILib data types and stock widgets"
 )
 @SuppressWarnings("PMD.CouplingBetweenObjects")
@@ -89,6 +92,7 @@ public class BasePlugin extends Plugin {
         RobotPreferencesType.Instance,
         SendableChooserType.Instance,
         SpeedControllerType.Instance,
+        SolenoidType.Instance,
         SubsystemType.Instance,
         BasicSubsystemType.Instance,
         CommandType.Instance,
@@ -123,6 +127,7 @@ public class BasePlugin extends Plugin {
         WidgetType.forAnnotatedWidget(EncoderWidget.class),
         WidgetType.forAnnotatedWidget(RobotPreferencesWidget.class),
         WidgetType.forAnnotatedWidget(SpeedControllerWidget.class),
+        WidgetType.forAnnotatedWidget(SolenoidWidget.class),
         WidgetType.forAnnotatedWidget(CommandWidget.class),
         WidgetType.forAnnotatedWidget(BasicSubsystemWidget.class),
         WidgetType.forAnnotatedWidget(PIDCommandWidget.class),
@@ -154,6 +159,7 @@ public class BasePlugin extends Plugin {
         .put(QuadratureEncoderType.Instance, WidgetType.forAnnotatedWidget(EncoderWidget.class))
         .put(RobotPreferencesType.Instance, WidgetType.forAnnotatedWidget(RobotPreferencesWidget.class))
         .put(SpeedControllerType.Instance, WidgetType.forAnnotatedWidget(SpeedControllerWidget.class))
+        .put(SolenoidType.Instance, WidgetType.forAnnotatedWidget(SolenoidWidget.class))
         .put(CommandType.Instance, WidgetType.forAnnotatedWidget(CommandWidget.class))
         .put(PIDCommandType.Instance, WidgetType.forAnnotatedWidget(PIDCommandWidget.class))
         .put(PIDControllerType.Instance, WidgetType.forAnnotatedWidget(PIDControllerWidget.class))
@@ -173,6 +179,7 @@ public class BasePlugin extends Plugin {
   @Override
   public Set<PropertyParser<?>> getPropertyParsers() {
     return Set.of(
+        PropertyParser.forEnum(Piston.Position.class),
         PropertyParser.forEnum(ThreeAxisAccelerometerWidget.Range.class),
         PropertyParser.forEnum(UltrasonicWidget.Unit.class)
     );

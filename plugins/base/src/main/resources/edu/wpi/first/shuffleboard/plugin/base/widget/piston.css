@@ -1,0 +1,35 @@
+/*******************************************************************************
+ *                                                                             *
+ * CSS for the piston control                                                  *
+ *                                                                             *
+ ******************************************************************************/
+.piston {
+    -fx-background-color: none;
+    -piston-color: -swatch-light-gray;
+    -piston-dark-color: derive(-piston-color, -40%);
+    -air-color: lightgray;
+}
+
+.piston-cylinder {
+    -fx-fill: -piston-color;
+}
+
+.piston-head {
+    -fx-fill: -piston-color;
+}
+
+.piston-shaft {
+    -fx-fill: -piston-dark-color;
+}
+
+.piston-piston {
+    -fx-fill: -piston-dark-color;
+}
+
+.piston-connector {
+    -fx-fill: -piston-color;
+}
+
+.air {
+    -fx-fill: -air-color;
+}
