@@ -53,10 +53,13 @@ public final class PropertySaver {
         var property = setting.getProperty();
         if (!savedProperties.contains(property)) {
           Class<?> type = setting.getType() == null ? setting.getProperty().getClass() : setting.getType();
-          serializeProperty(context, jsonObject, property, type,group.getName() + "/" + setting.getName());
+          serializeProperty(context, jsonObject, property, type, group.getName() + "/" + setting.getName());
         }
       }
     }
+
+    // Save custom CSS
+    serializeProperty(context, jsonObject, object.getView().styleProperty(), String.class, "Style/CSS");
 
     saveAnnotatedFields(object, context, jsonObject);
     saveNestedProperties(object, context, jsonObject);
@@ -140,6 +143,11 @@ public final class PropertySaver {
           setting.setValue(deserialized);
         }
       }
+    }
+
+    String css = context.deserialize(jsonObject.get("Style/CSS"), String.class);
+    if (css != null) {
+      object.getView().setStyle(css);
     }
 
     readAnnotatedFields(object, context, jsonObject);

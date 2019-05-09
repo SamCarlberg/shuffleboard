@@ -68,6 +68,8 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 
@@ -614,6 +616,7 @@ public class WidgetPaneController {
    */
   private Category createSettingsCategoriesForComponent(Component component) {
     List<Group> groups = new ArrayList<>(component.getSettings());
+    groups.add(styleGroup(component));
     groups.add(titleGroup(component));
     String categoryName = component.getTitle().isEmpty() ? "Unnamed " + component.getName() : component.getTitle();
     if (component instanceof ComponentContainer) {
@@ -640,6 +643,12 @@ public class WidgetPaneController {
             "The title of this " + component.getName().toLowerCase(Locale.US),
             component.titleProperty()
         )
+    );
+  }
+
+  private Group styleGroup(Component component) {
+    return Group.of("Style",
+        Setting.of("CSS", "Custom CSS for " + component.getTitle(), component.getView().styleProperty(), String.class)
     );
   }
 
